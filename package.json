@@ -2,7 +2,7 @@
   "name": "resource-toolkit",
   "version": "0.0.0-development",
   "description": "Async resource management util.",
-  "main": "index.js",
+  "main": "./src/index.ts",
   "engines": {
     "node": ">=12.0.0"
   },
@@ -31,14 +31,15 @@
     "type": "git",
     "url": "https://github.com/mazuh/resource-toolkit.git"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@babel/preset-env": "^7.8.3"
+  },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.8.3",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^7.1.2",
+    "awesome-typescript-loader": "^5.2.1",
     "babel-eslint": "^10.0.1",
-    "babel-plugin-syntax-async-functions": "^6.13.0",
-    "babel-plugin-transform-regenerator": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
     "cz-conventional-changelog": "^1.2.0",
     "eslint": "^6.0.1",
     "eslint-config-standard": "^13.0.1",
@@ -53,7 +54,8 @@
     "lint-staged": "^9.2.0",
     "lockfile-lint": "^2.0.1",
     "open-cli": "^5.0.0",
-    "prettier": "^1.18.2"
+    "prettier": "^1.18.2",
+    "source-map-loader": "^0.2.4"
   },
   "jest": {
     "testEnvironment": "node",
@@ -72,7 +74,7 @@
       "/__tests__/.*/__fixtures__/.*"
     ],
     "collectCoverageFrom": [
-      "index.js",
+      "./src/index.ts",
       "src/**/*.{js,ts}"
     ],
     "testMatch": [
@@ -98,15 +100,6 @@
       "@commitlint/config-conventional"
     ]
   },
-  "standard": {
-    "env": [
-      "jest"
-    ],
-    "parser": "babel-eslint",
-    "ignore": [
-      "**/out/"
-    ]
-  },
   "eslintIgnore": [
     "coverage/**"
   ],
@@ -124,8 +117,7 @@
       "jest"
     ],
     "extends": [
-      "standard",
-      "plugin:node/recommended"
+      "standard"
     ],
     "rules": {
       "semi": [
@@ -133,6 +125,10 @@
         "always"
       ],
       "no-process-exit": "warn",
+      "comma-dangle": [
+        "error",
+        "only-multiline"
+      ],
       "jest/no-disabled-tests": "error",
       "jest/no-identical-title": "error",
       "security/detect-non-literal-fs-filename": "error",
@@ -148,10 +144,12 @@
       "security/detect-pseudoRandomBytes": "error"
     },
     "parserOptions": {
-      "ecmaVersion": 8,
+      "ecmaVersion": 10,
       "ecmaFeatures": {
         "impliedStrict": true
-      }
+      },
+      "sourceType": "module",
+      "allowImportExportEverywhere": true
     }
   }
 }

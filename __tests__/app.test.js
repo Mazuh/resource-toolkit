@@ -1,3 +1,5 @@
+import { double } from '../src/index';
+
 test('true is true', () => {
-  expect(true).toBe(true);
+  expect(double(2)).toBe(4);
 });
