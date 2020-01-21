@@ -1,3 +1,5 @@
-export function double(a: number): number {
-  return a * 2;
-}
+import makeReduxAssets from './redux-assets-factory';
+
+export {
+  makeReduxAssets,
+};

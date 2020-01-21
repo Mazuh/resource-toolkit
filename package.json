@@ -55,7 +55,8 @@
     "lockfile-lint": "^2.0.1",
     "open-cli": "^5.0.0",
     "prettier": "^1.18.2",
-    "source-map-loader": "^0.2.4"
+    "source-map-loader": "^0.2.4",
+    "typescript": "^3.7.5"
   },
   "jest": {
     "testEnvironment": "node",
