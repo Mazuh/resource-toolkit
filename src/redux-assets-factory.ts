@@ -9,7 +9,7 @@ const initialState: ResourceState = {
   updating: [],
   deleting: [],
   finishingLogs: [],
-  lastMessage: null,
+  currentMessage: null,
 };
 
 export type ResourceToolParams = {
@@ -56,25 +56,29 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       content: causedByError,
       identifying,
     }),
+    clearCurrentMessage: () => makeAction({
+      operation: 'CLEAR_CURRENT_MESSAGE',
+      step: 'SUCCESS',
+    }),
   };
 
   type BoundDispatch = (action: BoundResourceActon) => void;
 
   const actions = {
     ...plainActions,
-    getOne: (identifying: Identifier) => async (dispatch: BoundDispatch) => {
+    fetchOne: (identifying: Identifier) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading(identifying));
       try {
-        const content = await gateway.getOne();
+        const content = await gateway.fetchOne();
         dispatch(plainActions.setRead(identifying, content));
       } catch (error) {
         dispatch(plainActions.setReadError(identifying, error));
       }
     },
-    getMany: () => async (dispatch: BoundDispatch) => {
+    fetchMany: () => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading());
       try {
-        const content = await gateway.getMany();
+        const content = await gateway.fetchMany();
         dispatch(plainActions.setRead(null, content));
       } catch (error) {
         dispatch(plainActions.setReadError(null, error));
@@ -118,7 +122,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
       if (isFinished) {
         updating.isCreating = false;
-        updating.lastMessage = { text: makeMessageText(content, operation, isError), isError };
+        updating.currentMessage = { text: makeMessageText(content, operation, isError), isError };
       }
     }
     */
@@ -187,8 +191,6 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         } else if (identifying) {
           updating.updating = state.updating.filter(id => id !== identifying);
         }
-
-        updating.lastMessage = { text: makeMessageText(content, operation, isError), isError };
       }
     }
 
@@ -215,20 +217,20 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         } else if (identifying) {
           updating.deleting = state.deleting.filter(id => id !== identifying);
         }
-
-        updating.lastMessage = { text: makeMessageText(content, operation, isError), isError };
       }
     }
     */
 
-    if (isFinished) {
+    if (operation === 'CLEAR_CURRENT_MESSAGE') {
+      updating.currentMessage = null;
+    } else if (isFinished) {
       const message: Message = {
         text: makeMessageText(content, operation, isError),
         causedByError: content instanceof Error ? content : null,
         isError,
       };
       updating.finishingLogs = [...state.finishingLogs, message];
-      updating.lastMessage = message;
+      updating.currentMessage = message;
     }
 
     return updating;

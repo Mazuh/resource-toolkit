@@ -14,6 +14,16 @@ describe('action factory with plain actions', () => {
     });
   });
 
+  it('has action for clearing the current message', () => {
+    const action = userResource.actions.clearCurrentMessage();
+    const expectedAction = userResource.makeAction({
+      operation: 'CLEAR_CURRENT_MESSAGE',
+      step: 'SUCCESS',
+    });
+
+    expect(action).toEqual(expectedAction);
+  });
+
   it('has action for set reading blindly', () => {
     const action = userResource.actions.setReading();
     const expectedAction = userResource.makeAction({

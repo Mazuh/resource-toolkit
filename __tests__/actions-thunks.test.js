@@ -7,7 +7,7 @@ describe('action factory with thunks, relying in primitive actions, for a workin
 
   beforeEach(() => {
     UserRestfulAPI = {
-      getOne: makeMockedFetchFn({
+      fetchOne: makeMockedFetchFn({
         data: {
           id: 69,
           firstName: 'Marcell',
@@ -15,7 +15,7 @@ describe('action factory with thunks, relying in primitive actions, for a workin
         },
         meta: defaultEmptyMeta,
       }),
-      getMany: makeMockedFetchFn({
+      fetchMany: makeMockedFetchFn({
         data: [
           {
             id: 69,
@@ -40,14 +40,14 @@ describe('action factory with thunks, relying in primitive actions, for a workin
       name: 'USER',
       idKey: 'id',
       gateway: {
-        getMany: async () => {
-          const response = await UserRestfulAPI.getMany();
+        fetchMany: async () => {
+          const response = await UserRestfulAPI.fetchMany();
           const body = await response.json();
           return body['data'];
         },
       },
     });
-    const thunk = userResource.actions.getMany();
+    const thunk = userResource.actions.fetchMany();
     const expectedReadData = [
       {
         id: 69,
@@ -76,10 +76,10 @@ describe('action factory with thunks, relying in primitive actions, for a workin
       name: 'USER',
       idKey: 'id',
       gateway: {
-        getMany: () => Promise.reject(error),
+        fetchMany: () => Promise.reject(error),
       },
     });
-    const thunk = userResource.actions.getMany();
+    const thunk = userResource.actions.fetchMany();
     await thunk(dispatch);
 
     expect(dispatch).toBeCalledTimes(2);
@@ -94,14 +94,14 @@ describe('action factory with thunks, relying in primitive actions, for a workin
       name: 'USER',
       idKey: 'id',
       gateway: {
-        getOne: async () => {
-          const response = await UserRestfulAPI.getOne();
+        fetchOne: async () => {
+          const response = await UserRestfulAPI.fetchOne();
           const body = await response.json();
           return body['data'];
         },
       },
     });
-    const thunk = userResource.actions.getOne(69);
+    const thunk = userResource.actions.fetchOne(69);
     const expectedReadData = {
       id: 69,
       firstName: 'Marcell',
@@ -123,10 +123,10 @@ describe('action factory with thunks, relying in primitive actions, for a workin
       name: 'USER',
       idKey: 'id',
       gateway: {
-        getOne: () => Promise.reject(error),
+        fetchOne: () => Promise.reject(error),
       },
     });
-    const thunk = userResource.actions.getOne(69);
+    const thunk = userResource.actions.fetchOne(69);
     await thunk(dispatch);
 
     expect(dispatch).toBeCalledTimes(2);

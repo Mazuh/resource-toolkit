@@ -6,7 +6,7 @@ export interface ResourceState {
   updating: Identifier[];
   deleting: Identifier[];
   finishingLogs: Message[],
-  lastMessage?: Message;
+  currentMessage?: Message;
 }
 
 export interface ResourceAction<T extends string> {
@@ -32,6 +32,7 @@ export type Operation = (
   | 'READ'
   | 'UPDATE'
   | 'DELETE'
+  | 'CLEAR_CURRENT_MESSAGE'
 );
 
 export interface Message {
@@ -49,6 +50,6 @@ export type IdentifierKey = string;
 export type Identifier = string | number;
 
 export interface Gateway {
-  getOne?: (...args: any[]) => Promise<Entity>;
-  getMany?: (...args: any[]) => Promise<Entity[]>;
+  fetchOne?: (...args: any[]) => Promise<Entity>;
+  fetchMany?: (...args: any[]) => Promise<Entity[]>;
 }
