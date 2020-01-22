@@ -106,27 +106,6 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
     const updating = { ...state };
 
-    /*
-    if (operation === 'CREATE') {
-      if (isLoading) {
-        updating.isCreating = true;
-      }
-
-      if (isSuccess) {
-        if (Array.isArray(content)) {
-          updating.items = [...state.items, ...content];
-        } else if (content) {
-          updating.items = [...state.items, content];
-        }
-      }
-
-      if (isFinished) {
-        updating.isCreating = false;
-        updating.currentMessage = { text: makeMessageText(content, operation, isError), isError };
-      }
-    }
-    */
-
     if (operation === 'READ') {
       if (isLoading) {
         if (Array.isArray(identifying)) {
@@ -156,70 +135,6 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         }
       }
     }
-
-    /*
-    if (operation === 'UPDATE') {
-      if (isLoading) {
-        if (Array.isArray(identifying)) {
-          updating.updating = [...state.updating, ...identifying];
-        } else if (identifying) {
-          updating.updating = [...state.updating, identifying];
-        }
-      }
-
-      if (isSuccess) {
-        if (Array.isArray(identifying)) {
-          updating.items = state.items.map((existing) => {
-            const matching = content.find(it => it[idKey] === existing[idKey]);
-            if (!matching) {
-              return existing;
-            }
-
-            return { ...existing, ...matching };
-          });
-        } else if (identifying) {
-          updating.items = state.items.map(it => it[idKey] === identifying
-            ? { ...it, ...content }
-            : it
-          );
-        }
-      }
-
-      if (isFinished) {
-        if (Array.isArray(identifying)) {
-          updating.updating = state.updating.filter(id => !identifying.includes(id));
-        } else if (identifying) {
-          updating.updating = state.updating.filter(id => id !== identifying);
-        }
-      }
-    }
-
-    if (operation === 'DELETE') {
-      if (isLoading) {
-        if (Array.isArray(identifying)) {
-          updating.deleting = [...state.deleting, ...identifying];
-        } else if (identifying) {
-          updating.deleting = [...state.deleting, identifying];
-        }
-      }
-
-      if (isSuccess) {
-        if (Array.isArray(identifying)) {
-          updating.items = state.items.filter(it => !identifying.includes(it[idKey]));
-        } else if (identifying) {
-          updating.items = state.items.filter(it => it[idKey] !== identifying);
-        }
-      }
-
-      if (isFinished) {
-        if (Array.isArray(identifying)) {
-          updating.deleting = state.deleting.filter(id => !identifying.includes(id));
-        } else if (identifying) {
-          updating.deleting = state.deleting.filter(id => id !== identifying);
-        }
-      }
-    }
-    */
 
     if (operation === 'CLEAR_CURRENT_MESSAGE') {
       updating.currentMessage = null;

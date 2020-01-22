@@ -12,5 +12,5 @@ export const defaultEmptyMeta = {};
 
 export const defaultPaginatedMeta = {
   previous: 'https://previous-page',
-  previous: 'https://next-page',
+  next: 'https://next-page',
 };

@@ -1,6 +1,4 @@
 import { makeReduxAssets } from '../src';
-import { makeMockedFetchFn, defaultPaginatedMeta, defaultEmptyMeta } from './utils';
-import { makeDefaultMessageText } from '../src/utils';
 
 const defaultState = {
   items: [],
