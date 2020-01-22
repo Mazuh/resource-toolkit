@@ -1,10 +1,11 @@
 export interface ResourceState {
   items: Entity[];
   isCreating: boolean,
-  isReadingBlind: boolean,
+  isReadingBlindly: boolean,
   reading: Identifier[];
   updating: Identifier[];
   deleting: Identifier[];
+  finishingLogs: Message[],
   lastMessage?: Message;
 }
 
@@ -14,10 +15,10 @@ export interface ResourceAction<T extends string> {
 }
 
 export interface ResourceIntent {
-  step: Step;
   operation: Operation;
+  step: Step;
   identifying?: Identifier | Identifier[];
-  content?: Entity | Entity[];
+  content?: Entity | Entity[] | Error;
 }
 
 export type Step = (
@@ -36,6 +37,7 @@ export type Operation = (
 export interface Message {
   text: string;
   isError: boolean;
+  causedByError?: Error | null,
 };
 
 export interface Entity {
@@ -47,6 +49,6 @@ export type IdentifierKey = string;
 export type Identifier = string | number;
 
 export interface Gateway {
-  getOne?: () => Promise<any>;
-  getMany?: () => Promise<any>;
+  getOne?: (...args: any[]) => Promise<Entity>;
+  getMany?: (...args: any[]) => Promise<Entity[]>;
 }

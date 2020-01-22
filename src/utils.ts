@@ -1,3 +1,5 @@
+import { Entity, Operation } from './redux-typings';
+
 export function makeDefaultMessageText(relating: Entity | Entity[], operation: Operation, isError: boolean): string {
   const attachmentForMany = Array.isArray(relating) ? ` Related to ${relating.length} items.` : '';
   switch (operation) {
