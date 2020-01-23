@@ -1,7 +1,7 @@
 import { makeReduxAssets } from '../src';
 import { makeMockedFetchFn, defaultEmptyMeta, defaultPaginatedMeta } from './utils';
 
-describe('action factory with thunks, relying in primitive actions, for a working API', () => {
+describe('action factory with thunks, relying in other plain actions, for a working API', () => {
   let UserRestfulAPI;
   let dispatch;
 
@@ -35,7 +35,7 @@ describe('action factory with thunks, relying in primitive actions, for a workin
     dispatch = jest.fn();
   });
 
-  it('on reading many, dispatchs loading and done', async done => {
+  it('on reading many blindly, dispatchs loading and done', async done => {
     const userResource = makeReduxAssets({
       name: 'USER',
       idKey: 'id',
@@ -64,13 +64,13 @@ describe('action factory with thunks, relying in primitive actions, for a workin
     await thunk(dispatch);
 
     expect(dispatch).toBeCalledTimes(2);
-    expect(dispatch).toBeCalledWith(userResource.actions.setReading());
+    expect(dispatch).toBeCalledWith(userResource.actions.setReading(null));
     expect(dispatch).toBeCalledWith(userResource.actions.setRead(null, expectedReadData));
 
     done();
   });
 
-  it('on reading many, dispatchs loading and error', async done => {
+  it('on reading many blindly, dispatchs loading and error', async done => {
     const error = new Error('Programming error');
     const userResource = makeReduxAssets({
       name: 'USER',
@@ -83,7 +83,7 @@ describe('action factory with thunks, relying in primitive actions, for a workin
     await thunk(dispatch);
 
     expect(dispatch).toBeCalledTimes(2);
-    expect(dispatch).toBeCalledWith(userResource.actions.setReading());
+    expect(dispatch).toBeCalledWith(userResource.actions.setReading(null));
     expect(dispatch).toBeCalledWith(userResource.actions.setReadError(null, error));
 
     done();
@@ -132,6 +132,27 @@ describe('action factory with thunks, relying in primitive actions, for a workin
     expect(dispatch).toBeCalledTimes(2);
     expect(dispatch).toBeCalledWith(userResource.actions.setReading(69));
     expect(dispatch).toBeCalledWith(userResource.actions.setReadError(69, error));
+
+    done();
+  });
+
+  it('any thunk action creator must pass all its args thru its gateway', async done => {
+    const gatewayFetchOne = jest.fn(() => Promise.resolve([]));
+    const gatewayFetchMany = jest.fn(() => Promise.resolve([]));
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      gateway: {
+        fetchOne: gatewayFetchOne,
+        fetchMany: gatewayFetchMany,
+      },
+    });
+
+    await userResource.actions.fetchOne(null, { my: 'args' }, 'one', 123)(dispatch);
+    expect(gatewayFetchOne).toBeCalledWith({ my: 'args' }, 'one', 123);
+
+    await userResource.actions.fetchMany(null, { my: 'args' }, 'many', 123)(dispatch);
+    expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
 
     done();
   });

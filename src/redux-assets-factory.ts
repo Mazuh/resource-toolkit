@@ -66,22 +66,22 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
   const actions = {
     ...plainActions,
-    fetchOne: (identifying: Identifier) => async (dispatch: BoundDispatch) => {
+    fetchOne: (identifying: Identifier = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading(identifying));
       try {
-        const content = await gateway.fetchOne();
+        const content = await gateway.fetchOne(...args);
         dispatch(plainActions.setRead(identifying, content));
       } catch (error) {
         dispatch(plainActions.setReadError(identifying, error));
       }
     },
-    fetchMany: () => async (dispatch: BoundDispatch) => {
-      dispatch(plainActions.setReading());
+    fetchMany: (identifying: Identifier[] = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      dispatch(plainActions.setReading(identifying));
       try {
-        const content = await gateway.fetchMany();
-        dispatch(plainActions.setRead(null, content));
+        const content = await gateway.fetchMany(...args);
+        dispatch(plainActions.setRead(identifying, content));
       } catch (error) {
-        dispatch(plainActions.setReadError(null, error));
+        dispatch(plainActions.setReadError(identifying, error));
       }
     },
   };

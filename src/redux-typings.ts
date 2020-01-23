@@ -50,6 +50,6 @@ export type IdentifierKey = string;
 export type Identifier = string | number;
 
 export interface Gateway {
-  fetchOne?: (...args: any[]) => Promise<Entity>;
-  fetchMany?: (...args: any[]) => Promise<Entity[]>;
+  fetchOne?: (identifying?: Identifier, ...args: any[]) => Promise<Entity>;
+  fetchMany?: (identifying?: Identifier[], ...args: any[]) => Promise<Entity[]>;
 }
