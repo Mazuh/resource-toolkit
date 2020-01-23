@@ -105,7 +105,8 @@
     ]
   },
   "eslintIgnore": [
-    "coverage/**"
+    "coverage/**",
+    "dist/"
   ],
   "eslintConfig": {
     "env": {
