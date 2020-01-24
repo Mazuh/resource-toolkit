@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "release": "npm run build && npm publish",
+    "release": "npm test && npm run build && npm publish",
     "lint": "eslint . && npm run lint:lockfile",
     "lint:lockfile": "lockfile-lint --path package-lock.json --type npm --validate-https --allowed-hosts npm yarn",
     "lint:fix": "eslint . --fix",
