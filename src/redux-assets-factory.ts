@@ -26,12 +26,12 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
     makeMessageText = makeDefaultMessageText,
   } = params;
 
-  const namespacedName = `RESOURCE_TOOlKIT__${name}`;
+  const actionType = `RESOURCE_TOOlKIT__${name}`;
 
-  type BoundResourceActon = ResourceAction<typeof namespacedName>;
+  type BoundResourceActon = ResourceAction<typeof actionType>;
   const makeAction = (payload: ResourceIntent): BoundResourceActon => {
     return {
-      type: namespacedName,
+      type: actionType,
       payload,
     };
   };
@@ -87,7 +87,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
   };
 
   const reducer = (state: ResourceState = initialState, action: BoundResourceActon): ResourceState => {
-    if (!action || action.type !== namespacedName) {
+    if (!action || action.type !== actionType) {
       return state;
     }
 
@@ -152,8 +152,8 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
   };
 
   return {
-    name: namespacedName,
     initialState: { ...initialState },
+    actionType,
     makeAction,
     actions,
     reducer,

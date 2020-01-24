@@ -14,6 +14,10 @@ describe('action factory with plain actions', () => {
     });
   });
 
+  it('has action type exposed', () => {
+    expect(userResource.actionType).toBe('RESOURCE_TOOlKIT__USER');
+  });
+
   it('has action for clearing the current message', () => {
     const action = userResource.actions.clearCurrentMessage();
     const expectedAction = userResource.makeAction({
