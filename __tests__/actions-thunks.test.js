@@ -40,14 +40,14 @@ describe('action factory with thunks, relying in other plain actions, for a work
       name: 'USER',
       idKey: 'id',
       gateway: {
-        fetchMany: async () => {
+        readMany: async () => {
           const response = await UserRestfulAPI.fetchMany();
           const body = await response.json();
           return body['data'];
         },
       },
     });
-    const thunk = userResource.actions.fetchMany();
+    const thunk = userResource.actions.readMany();
     const expectedReadData = [
       {
         id: 69,
@@ -76,10 +76,10 @@ describe('action factory with thunks, relying in other plain actions, for a work
       name: 'USER',
       idKey: 'id',
       gateway: {
-        fetchMany: () => Promise.reject(error),
+        readMany: () => Promise.reject(error),
       },
     });
-    const thunk = userResource.actions.fetchMany();
+    const thunk = userResource.actions.readMany();
     await thunk(dispatch);
 
     expect(dispatch).toBeCalledTimes(2);
@@ -94,14 +94,14 @@ describe('action factory with thunks, relying in other plain actions, for a work
       name: 'USER',
       idKey: 'id',
       gateway: {
-        fetchMany: async () => {
+        readMany: async () => {
           const response = await UserRestfulAPI.fetchMany();
           const body = await response.json();
           return body['data'];
         },
       },
     });
-    const thunk = userResource.actions.fetchAll();
+    const thunk = userResource.actions.readAll();
     const expectedReadData = [
       {
         id: 69,
@@ -131,10 +131,10 @@ describe('action factory with thunks, relying in other plain actions, for a work
       name: 'USER',
       idKey: 'id',
       gateway: {
-        fetchMany: () => Promise.reject(error),
+        readMany: () => Promise.reject(error),
       },
     });
-    const thunk = userResource.actions.fetchAll();
+    const thunk = userResource.actions.readAll();
     await thunk(dispatch);
 
     expect(dispatch).toBeCalledTimes(2);
@@ -149,14 +149,14 @@ describe('action factory with thunks, relying in other plain actions, for a work
       name: 'USER',
       idKey: 'id',
       gateway: {
-        fetchOne: async () => {
+        readOne: async () => {
           const response = await UserRestfulAPI.fetchOne();
           const body = await response.json();
           return body['data'];
         },
       },
     });
-    const thunk = userResource.actions.fetchOne(69);
+    const thunk = userResource.actions.readOne(69);
     const expectedReadData = {
       id: 69,
       firstName: 'Marcell',
@@ -178,10 +178,10 @@ describe('action factory with thunks, relying in other plain actions, for a work
       name: 'USER',
       idKey: 'id',
       gateway: {
-        fetchOne: () => Promise.reject(error),
+        readOne: () => Promise.reject(error),
       },
     });
-    const thunk = userResource.actions.fetchOne(69);
+    const thunk = userResource.actions.readOne(69);
     await thunk(dispatch);
 
     expect(dispatch).toBeCalledTimes(2);
@@ -198,20 +198,20 @@ describe('action factory with thunks, relying in other plain actions, for a work
       name: 'USER',
       idKey: 'id',
       gateway: {
-        fetchOne: gatewayFetchOne,
-        fetchMany: gatewayFetchMany,
+        readOne: gatewayFetchOne,
+        readMany: gatewayFetchMany,
       },
     });
 
-    await userResource.actions.fetchOne(null, { my: 'args' }, 'one', 123)(dispatch);
+    await userResource.actions.readOne(null, { my: 'args' }, 'one', 123)(dispatch);
     expect(gatewayFetchOne).toBeCalledWith({ my: 'args' }, 'one', 123);
     gatewayFetchOne.mockClear();
 
-    await userResource.actions.fetchMany(null, { my: 'args' }, 'many', 123)(dispatch);
+    await userResource.actions.readMany(null, { my: 'args' }, 'many', 123)(dispatch);
     expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayFetchMany.mockClear();
 
-    await userResource.actions.fetchAll({ my: 'args' }, 'many', 123)(dispatch);
+    await userResource.actions.readAll({ my: 'args' }, 'many', 123)(dispatch);
     expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayFetchMany.mockClear();
 

@@ -70,28 +70,28 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
   const actions = {
     ...plainActions,
-    fetchOne: (identifying: Identifier = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
+    readOne: (identifying: Identifier = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading(identifying));
       try {
-        const content = await gateway.fetchOne(...args);
+        const content = await gateway.readOne(...args);
         dispatch(plainActions.setRead(identifying, content));
       } catch (error) {
         dispatch(plainActions.setReadError(identifying, error));
       }
     },
-    fetchMany: (identifying: Identifier[] = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
+    readMany: (identifying: Identifier[] = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading(identifying));
       try {
-        const content = await gateway.fetchMany(...args);
+        const content = await gateway.readMany(...args);
         dispatch(plainActions.setRead(identifying, content));
       } catch (error) {
         dispatch(plainActions.setReadError(identifying, error));
       }
     },
-    fetchAll: (...args: any[]) => async (dispatch: BoundDispatch) => {
+    readAll: (...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading());
       try {
-        const content = await gateway.fetchMany(...args);
+        const content = await gateway.readMany(...args);
         dispatch(plainActions.clearItems());
         dispatch(plainActions.setRead(null, content));
       } catch (error) {
