@@ -156,4 +156,13 @@ describe('reducer factory', () => {
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
+
+  it('hamdles items clearing', () => {
+    const action = userResource.actions.clearItems();
+
+    const previousState = { ...defaultState, items: ['a', 'b', 'c'] };
+    const expectedCurrentState = { ...defaultState, items: [] };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
 });

@@ -39,7 +39,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
   type GatewayIdentifying = Identifier | Identifier[];
   type GatewayContent = Entity | Entity[];
   const plainActions = {
-    setReading: (identifying?: GatewayIdentifying) => makeAction({
+    setReading: (identifying: GatewayIdentifying = null) => makeAction({
       operation: 'READ',
       step: 'DOING',
       identifying,
@@ -55,6 +55,10 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       step: 'ERROR',
       content: causedByError,
       identifying,
+    }),
+    clearItems: () => makeAction({
+      operation: 'CLEAR_ITEMS',
+      step: 'SUCCESS',
     }),
     clearCurrentMessage: () => makeAction({
       operation: 'CLEAR_CURRENT_MESSAGE',
@@ -82,6 +86,16 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         dispatch(plainActions.setRead(identifying, content));
       } catch (error) {
         dispatch(plainActions.setReadError(identifying, error));
+      }
+    },
+    fetchAll: (...args: any[]) => async (dispatch: BoundDispatch) => {
+      dispatch(plainActions.setReading());
+      try {
+        const content = await gateway.fetchMany(...args);
+        dispatch(plainActions.clearItems());
+        dispatch(plainActions.setRead(null, content));
+      } catch (error) {
+        dispatch(plainActions.setReadError(null, error));
       }
     },
   };
@@ -136,7 +150,9 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
     }
 
-    if (operation === 'CLEAR_CURRENT_MESSAGE') {
+    if (operation === 'CLEAR_ITEMS') {
+      updating.items = [];
+    } else if (operation === 'CLEAR_CURRENT_MESSAGE') {
       updating.currentMessage = null;
     } else if (isFinished) {
       const message: Message = {

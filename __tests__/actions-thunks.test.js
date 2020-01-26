@@ -89,6 +89,61 @@ describe('action factory with thunks, relying in other plain actions, for a work
     done();
   });
 
+  it('on reading all, dispatchs loading, clear and done', async done => {
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      gateway: {
+        fetchMany: async () => {
+          const response = await UserRestfulAPI.fetchMany();
+          const body = await response.json();
+          return body['data'];
+        },
+      },
+    });
+    const thunk = userResource.actions.fetchAll();
+    const expectedReadData = [
+      {
+        id: 69,
+        firstName: 'Marcell',
+        lastName: 'Guilherme',
+      },
+      {
+        id: 42,
+        firstName: 'Crash',
+        lastName: 'Bandicoot',
+      },
+    ];
+
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(3);
+    expect(dispatch).toBeCalledWith(userResource.actions.setReading(null));
+    expect(dispatch).toBeCalledWith(userResource.actions.clearItems());
+    expect(dispatch).toBeCalledWith(userResource.actions.setRead(null, expectedReadData));
+
+    done();
+  });
+
+  it('on reading all, dispatchs loading and error', async done => {
+    const error = new Error('Programming error');
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      gateway: {
+        fetchMany: () => Promise.reject(error),
+      },
+    });
+    const thunk = userResource.actions.fetchAll();
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setReading(null));
+    expect(dispatch).toBeCalledWith(userResource.actions.setReadError(null, error));
+
+    done();
+  });
+
   it('on reading one, dispatchs loading and done', async done => {
     const userResource = makeReduxAssets({
       name: 'USER',
@@ -150,9 +205,15 @@ describe('action factory with thunks, relying in other plain actions, for a work
 
     await userResource.actions.fetchOne(null, { my: 'args' }, 'one', 123)(dispatch);
     expect(gatewayFetchOne).toBeCalledWith({ my: 'args' }, 'one', 123);
+    gatewayFetchOne.mockClear();
 
     await userResource.actions.fetchMany(null, { my: 'args' }, 'many', 123)(dispatch);
     expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
+    gatewayFetchMany.mockClear();
+
+    await userResource.actions.fetchAll({ my: 'args' }, 'many', 123)(dispatch);
+    expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
+    gatewayFetchMany.mockClear();
 
     done();
   });

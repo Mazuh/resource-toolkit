@@ -33,6 +33,7 @@ describe('action factory with plain actions', () => {
     const expectedAction = userResource.makeAction({
       operation: 'READ',
       step: 'DOING',
+      identifying: null,
     });
 
     expect(action).toEqual(expectedAction);
@@ -73,5 +74,15 @@ describe('action factory with plain actions', () => {
     });
 
     expect(action).toEqual(expectedAction);
+  });
+
+  it('has action for clearing all items', () => {
+    const acton = userResource.actions.clearItems();
+    const expectedAction = userResource.makeAction({
+      operation: 'CLEAR_ITEMS',
+      step: 'SUCCESS',
+    });
+
+    expect(acton).toEqual(expectedAction);
   });
 });
