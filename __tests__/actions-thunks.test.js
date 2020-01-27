@@ -1,5 +1,5 @@
 import { makeReduxAssets } from '../src';
-import { makeMockedFetchFn, defaultEmptyMeta, defaultPaginatedMeta } from './utils';
+import { makeMockedFetchFn, defaultEmptyMeta, defaultPaginatedMeta } from './mock-utils';
 
 describe('action factory with thunks, relying in other plain actions, for a working API', () => {
   let UserRestfulAPI;
@@ -7,14 +7,14 @@ describe('action factory with thunks, relying in other plain actions, for a work
 
   beforeEach(() => {
     UserRestfulAPI = {
-      fetchOne: makeMockedFetchFn({
+      fetchOne: makeMockedFetchFn(id => ({
         data: {
-          id: 69,
+          id,
           firstName: 'Marcell',
           lastName: 'Guilherme',
         },
         meta: defaultEmptyMeta,
-      }),
+      })),
       fetchMany: makeMockedFetchFn({
         data: [
           {
@@ -30,9 +30,39 @@ describe('action factory with thunks, relying in other plain actions, for a work
         ],
         meta: defaultPaginatedMeta,
       }),
+      fetchUpdate: makeMockedFetchFn((id, updated) => ({
+        data: { id, ...updated },
+      })),
     };
 
     dispatch = jest.fn();
+  });
+
+  it('any thunk action creator must pass all its args thru its gateway', async done => {
+    const gatewayFetchOne = jest.fn(() => Promise.resolve([]));
+    const gatewayFetchMany = jest.fn(() => Promise.resolve([]));
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      gateway: {
+        readOne: gatewayFetchOne,
+        readMany: gatewayFetchMany,
+      },
+    });
+
+    await userResource.actions.readOne(null, { my: 'args' }, 'one', 123)(dispatch);
+    expect(gatewayFetchOne).toBeCalledWith({ my: 'args' }, 'one', 123);
+    gatewayFetchOne.mockClear();
+
+    await userResource.actions.readMany(null, { my: 'args' }, 'many', 123)(dispatch);
+    expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
+    gatewayFetchMany.mockClear();
+
+    await userResource.actions.readAll({ my: 'args' }, 'many', 123)(dispatch);
+    expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
+    gatewayFetchMany.mockClear();
+
+    done();
   });
 
   it('on reading many blindly, dispatchs loading and done', async done => {
@@ -149,14 +179,14 @@ describe('action factory with thunks, relying in other plain actions, for a work
       name: 'USER',
       idKey: 'id',
       gateway: {
-        readOne: async () => {
-          const response = await UserRestfulAPI.fetchOne();
+        readOne: async queryset => {
+          const response = await UserRestfulAPI.fetchOne(queryset.id);
           const body = await response.json();
           return body['data'];
         },
       },
     });
-    const thunk = userResource.actions.readOne(69);
+    const thunk = userResource.actions.readOne(69, { id: 69 });
     const expectedReadData = {
       id: 69,
       firstName: 'Marcell',
@@ -191,29 +221,55 @@ describe('action factory with thunks, relying in other plain actions, for a work
     done();
   });
 
-  it('any thunk action creator must pass all its args thru its gateway', async done => {
-    const gatewayFetchOne = jest.fn(() => Promise.resolve([]));
-    const gatewayFetchMany = jest.fn(() => Promise.resolve([]));
+  it('on updating, dispatchs loading, clear and done', async done => {
     const userResource = makeReduxAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
-        readOne: gatewayFetchOne,
-        readMany: gatewayFetchMany,
+        update: async updating => {
+          const response = await UserRestfulAPI.fetchUpdate(updating.id, updating);
+          const body = await response.json();
+          return body['data'];
+        },
       },
     });
+    const expectedUpdatedData = {
+      id: 42,
+      name: 'Updated',
+      lastName: 'Doe',
+    };
+    const thunk = userResource.actions.update(42, expectedUpdatedData);
 
-    await userResource.actions.readOne(null, { my: 'args' }, 'one', 123)(dispatch);
-    expect(gatewayFetchOne).toBeCalledWith({ my: 'args' }, 'one', 123);
-    gatewayFetchOne.mockClear();
+    await thunk(dispatch);
 
-    await userResource.actions.readMany(null, { my: 'args' }, 'many', 123)(dispatch);
-    expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
-    gatewayFetchMany.mockClear();
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setUpdating(42));
+    expect(dispatch).toBeCalledWith(userResource.actions.setUpdated(42, expectedUpdatedData));
 
-    await userResource.actions.readAll({ my: 'args' }, 'many', 123)(dispatch);
-    expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
-    gatewayFetchMany.mockClear();
+    done();
+  });
+
+  it('on updating, dispatchs loading and error', async done => {
+    const error = new Error('Programming error');
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      gateway: {
+        update: () => Promise.reject(error),
+      },
+    });
+    const sillyUpdatingData = {
+      id: 42,
+      name: 'Updated',
+      lastName: 'Doe',
+    };
+    const thunk = userResource.actions.update(42, sillyUpdatingData);
+
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setUpdating(42));
+    expect(dispatch).toBeCalledWith(userResource.actions.setUpdateError(42, error));
 
     done();
   });

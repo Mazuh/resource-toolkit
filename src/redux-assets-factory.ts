@@ -44,14 +44,31 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       step: 'DOING',
       identifying,
     }),
+    setUpdating: (identifying: GatewayIdentifying) => makeAction({
+      operation: 'UPDATE',
+      step: 'DOING',
+      identifying,
+    }),
     setRead: (identifying?: GatewayIdentifying, content?: GatewayContent) => makeAction({
       operation: 'READ',
       step: 'SUCCESS',
       identifying,
       content,
     }),
+    setUpdated: (identifying: GatewayIdentifying, content: GatewayContent) => makeAction({
+      operation: 'UPDATE',
+      step: 'SUCCESS',
+      identifying,
+      content,
+    }),
     setReadError: (identifying?: GatewayIdentifying, causedByError?: Error) => makeAction({
       operation: 'READ',
+      step: 'ERROR',
+      content: causedByError,
+      identifying,
+    }),
+    setUpdateError: (identifying: GatewayIdentifying, causedByError?: Error) => makeAction({
+      operation: 'UPDATE',
       step: 'ERROR',
       content: causedByError,
       identifying,
@@ -70,7 +87,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
   const actions = {
     ...plainActions,
-    readOne: (identifying: Identifier = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
+    readOne: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading(identifying));
       try {
         const content = await gateway.readOne(...args);
@@ -96,6 +113,15 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         dispatch(plainActions.setRead(null, content));
       } catch (error) {
         dispatch(plainActions.setReadError(null, error));
+      }
+    },
+    update: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      dispatch(plainActions.setUpdating(identifying));
+      try {
+        const content = await gateway.update(...args);
+        dispatch(plainActions.setUpdated(identifying, content));
+      } catch (error) {
+        dispatch(plainActions.setUpdateError(identifying, error));
       }
     },
   };
@@ -146,6 +172,25 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
           updating.reading = state.reading.filter(id => id !== identifying);
         } else {
           updating.isReadingBlindly = false;
+        }
+      }
+    }
+
+    if (operation === 'UPDATE') {
+      if (!Array.isArray(identifying) && isLoading) {
+        updating.updating = [...state.updating, identifying];
+      }
+
+      if (!Array.isArray(identifying) && isSuccess) {
+        updating.items = state.items.map(it => it[idKey] === identifying
+          ? { ...it, ...content }
+          : it
+        );
+      }
+
+      if (isFinished) {
+        if (!Array.isArray(identifying) && identifying) {
+          updating.updating = state.updating.filter(id => id !== identifying);
         }
       }
     }

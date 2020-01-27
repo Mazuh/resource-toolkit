@@ -51,6 +51,7 @@ export type IdentifierKey = string;
 export type Identifier = string | number;
 
 export interface Gateway {
-  readOne?: (identifying?: Identifier, ...args: any[]) => Promise<Entity>;
-  readMany?: (identifying?: Identifier[], ...args: any[]) => Promise<Entity[]>;
+  readOne?: (...args: any[]) => Promise<Entity>;
+  readMany?: (...args: any[]) => Promise<Entity[]>;
+  update?: (...args: any[]) => Promise<Entity>;
 }

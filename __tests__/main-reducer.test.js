@@ -32,6 +32,7 @@ describe('reducer factory', () => {
 
   it('handles some error action by at least storing its log', () => {
     const error = new Error('Weird random programming error at reading');
+
     const action = userResource.actions.setReadError(null, error);
 
     const existingMessage = {
@@ -122,6 +123,21 @@ describe('reducer factory', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
+  it('handles loading action for updating', () => {
+    const action = userResource.actions.setUpdating(42);
+
+    const previousState = {
+      ...defaultState,
+      updating: [3],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      updating: [3, 42],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
   it('handles success action for reading blindly', () => {
     const expectedReadData = [
       {
@@ -140,6 +156,7 @@ describe('reducer factory', () => {
       isError: false,
       text: 'Successfully fetched data. Related to 2 items.',
     };
+
     const action = userResource.actions.setRead(null, expectedReadData);
 
     const previousState = {
@@ -157,7 +174,66 @@ describe('reducer factory', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
-  it('hamdles items clearing', () => {
+  it('handles success action for updating', () => {
+    const expectedMessage = {
+      causedByError: null,
+      isError: false,
+      text: 'Successfully updated.',
+    };
+
+    const action = userResource.actions.setUpdated(42, {
+      id: 42,
+      name: 'Marcell',
+      lastName: 'Guilherme',
+    });
+
+    const previousState = {
+      ...defaultState,
+      updating: [23, 42],
+      items: [
+        { id: 23, name: 'Jane', lastName: 'Doe' },
+        { id: 42, name: 'John', lastName: 'Doe' },
+      ],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      updating: [23],
+      items: [
+        { id: 23, name: 'Jane', lastName: 'Doe' },
+        { id: 42, name: 'Marcell', lastName: 'Guilherme' },
+      ],
+      currentMessage: expectedMessage,
+      finishingLogs: [expectedMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles error action for updating', () => {
+    const error = new Error('Weird random programming error at reading');
+    const expectedMessage = {
+      causedByError: error,
+      isError: true,
+      text: 'Failed to update.',
+    };
+
+    const action = userResource.actions.setUpdateError(42, error);
+
+    const previousState = {
+      ...defaultState,
+      updating: [23, 42],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      updating: [23],
+      finishingLogs: [expectedMessage],
+      currentMessage: expectedMessage,
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles items clearing', () => {
     const action = userResource.actions.clearItems();
 
     const previousState = { ...defaultState, items: ['a', 'b', 'c'] };
