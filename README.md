@@ -29,7 +29,53 @@ TODO
 
 ## Example
 
-TODO
+The snippet below is an example of integration with [Redux](https://redux.js.org/)
+using [Ducks pattern](https://redux.js.org/style-guide/style-guide/#structure-files-as-feature-folders-or-ducks)
+to create a simple state manager.
+
+```js
+import { makeReduxAssets } from 'resource-toolkit';
+
+export const userResource = makeReduxAssets({
+  name: 'USER',
+  idKey: 'id',
+  gateway: {
+    readMany: async (queryset) => {
+      // example with a restful API client, but...
+      // it can be any fetching (maybe querying from local storage?)
+      const response = await UserAPI.get(queryset);
+      const body = await response.json();
+      // my array of data may be nested in JSON body, or have another weird
+      // business logic after response so I have my change to implement it here.
+      return body.items;
+    },
+  },
+});
+
+export const initialState = {
+  ...userResource.initialState,
+  // (maybe I want to insert more fields here...)
+};
+
+const actions = {
+  ...userResource.actions,
+  // (any other action creator functions I may want...)
+};
+
+// cute naming, it'll be useful to mapDispatchToProps
+// if I'm using it with React
+export const userActions = actions;
+
+export default function did(state = initialState, action) {
+  switch (action.type) {
+    case userResource.actionType:
+      return userResource.reducer(state, action);
+    // (any other own custom handlers here, if they exist...)
+    default:
+      return state;
+  }
+}
+```
 
 ## Contributing
 
