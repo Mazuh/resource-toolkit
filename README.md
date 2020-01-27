@@ -66,7 +66,7 @@ const actions = {
 // if I'm using it with React
 export const userActions = actions;
 
-export default function did(state = initialState, action) {
+export default function reducer(state = initialState, action) {
   switch (action.type) {
     case userResource.actionType:
       return userResource.reducer(state, action);
@@ -74,6 +74,22 @@ export default function did(state = initialState, action) {
     default:
       return state;
   }
+}
+```
+
+An example of state content, all fully handled by the `reducer` without your interference
+besides implementing the gateway layer:
+
+```js
+{
+  items: [], // it'll store the objects retrieved and parsed by your gateway functions
+  isCreating: false, // bool if a creation thunk is pending
+  isReadingBlindly: false, // bool if a reading thunk is pending but the client is unaware of its ids
+  reading: [], // if reading thunk already knows the ids of what is being retrieved, it'll be stored here
+  updating: [], // to store ids of what entities are being currently updated
+  deleting: [], // to store ids of what entities are being currently deleted
+  finishingLogs: [], // to store all logs (you can leave the default parser or implement it you by yourself)
+  currentMessage: null, // last log (if it's an error, it may include the original exception for debugging)
 }
 ```
 
