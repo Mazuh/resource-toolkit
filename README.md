@@ -38,7 +38,7 @@ import { makeReduxAssets } from 'resource-toolkit';
 
 export const userResource = makeReduxAssets({
   name: 'USER',
-  idKey: 'id',
+  idKey: 'id', // what property will serve to uniquelly identify each resource object?
   gateway: {
     readMany: async (queryset) => {
       // example with a restful API client, but...
@@ -75,6 +75,33 @@ export default function reducer(state = initialState, action) {
       return state;
   }
 }
+```
+
+Below, the same state slice, but it's a snippet in case you don't want custom actions nor
+reducers for your regular CRUD:
+
+```js
+import { makeReduxAssets } from 'resource-toolkit';
+
+export const userResource = makeReduxAssets({
+  name: 'USER',
+  idKey: 'id',
+  gateway: {
+    readMany: async (queryset) => {
+      // it's still up to you here
+      const response = await UserAPI.get(queryset);
+      const body = await response.json();
+      return body.items;
+    },
+  },
+});
+
+export const initialState = userResource.initialState;
+
+const actions = userResource.actions;
+export const userActions = actions;
+
+export userResource.reducer;
 ```
 
 An example of state content, all fully handled by the `reducer` without your interference
