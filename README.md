@@ -104,7 +104,7 @@ export const userActions = actions;
 export userResource.reducer;
 ```
 
-An example of state content, all fully handled by the `reducer` without your interference
+An example of state content, all fully handled by the `reducer` and its thunks without your interference
 besides implementing the gateway layer:
 
 ```js
