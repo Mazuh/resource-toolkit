@@ -39,14 +39,16 @@ describe('action factory with thunks, relying in other plain actions, for a work
   });
 
   it('any thunk action creator must pass all its args thru its gateway', async done => {
-    const gatewayFetchOne = jest.fn(() => Promise.resolve([]));
+    const gatewayFetchOne = jest.fn(() => Promise.resolve({}));
     const gatewayFetchMany = jest.fn(() => Promise.resolve([]));
+    const gatewayUpdate = jest.fn(() => Promise.resolve({}));
     const userResource = makeReduxAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
         readOne: gatewayFetchOne,
         readMany: gatewayFetchMany,
+        update: gatewayUpdate,
       },
     });
 
@@ -61,6 +63,10 @@ describe('action factory with thunks, relying in other plain actions, for a work
     await userResource.actions.readAll({ my: 'args' }, 'many', 123)(dispatch);
     expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayFetchMany.mockClear();
+
+    await userResource.actions.update(1, { my: 'args' }, 'many', 123)(dispatch);
+    expect(gatewayUpdate).toBeCalledWith({ my: 'args' }, 'many', 123);
+    gatewayUpdate.mockClear();
 
     done();
   });
