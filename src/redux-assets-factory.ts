@@ -176,12 +176,12 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
     }
 
-    if (operation === 'UPDATE') {
-      if (!Array.isArray(identifying) && isLoading) {
+    if (operation === 'UPDATE' && !Array.isArray(identifying) && identifying) {
+      if (isLoading) {
         updating.updating = [...state.updating, identifying];
       }
 
-      if (!Array.isArray(identifying) && isSuccess) {
+      if (isSuccess) {
         updating.items = state.items.map(it => it[idKey] === identifying
           ? { ...it, ...content }
           : it
@@ -189,9 +189,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
 
       if (isFinished) {
-        if (!Array.isArray(identifying) && identifying) {
-          updating.updating = state.updating.filter(id => id !== identifying);
-        }
+        updating.updating = state.updating.filter(id => id !== identifying);
       }
     }
 

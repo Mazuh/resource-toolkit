@@ -60,6 +60,28 @@ describe('reducer factory', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
+  it('handles error action, defensively rejects non-Error types', () => {
+    const error = { message: 'am I really an error? my programmer should explicit throw so' };
+    const expectedMessage = {
+      causedByError: null,
+      isError: true,
+      text: 'Failed to update.',
+    };
+
+    const action = userResource.actions.setUpdateError(42, error);
+
+    const previousState = {
+      ...defaultState,
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      finishingLogs: [expectedMessage],
+      currentMessage: expectedMessage,
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
   it('supports adapter of error messages', () => {
     const adapter = jest.fn(() => 'Any custom message here!');
 
