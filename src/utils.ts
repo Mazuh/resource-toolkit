@@ -8,6 +8,8 @@ export function makeDefaultMessageText(relating: Entity | Entity[], operation: O
       return (isError ? 'Failed to fetch data.' : 'Successfully fetched data.') + attachmentForMany;
     case 'UPDATE':
       return (isError ? 'Failed to update.' : 'Successfully updated.');
+    case 'DELETE':
+      return (isError ? 'Failed to delete.' : 'Successfully deleted.');
     default:
       return isError
         ? 'Unknown and unexpected error response.'

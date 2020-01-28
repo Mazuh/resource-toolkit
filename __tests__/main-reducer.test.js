@@ -160,6 +160,15 @@ describe('reducer factory', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
+  it('handles loading action for deleting', () => {
+    const action = userResource.actions.setDeleting(3);
+
+    const previousState = { ...defaultState, deleting: [9, 4] };
+    const expectedCurrentState = { ...defaultState, deleting: [9, 4, 3] };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
   it('handles success action for reading blindly', () => {
     const expectedReadData = [
       {
@@ -250,6 +259,66 @@ describe('reducer factory', () => {
       updating: [23],
       finishingLogs: [expectedMessage],
       currentMessage: expectedMessage,
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles success action for deleting', () => {
+    const expectedMessage = {
+      causedByError: null,
+      isError: false,
+      text: 'Successfully deleted.',
+    };
+
+    const action = userResource.actions.setDeleted(42);
+
+    const previousState = {
+      ...defaultState,
+      deleting: [23, 42],
+      items: [
+        { id: 23, name: 'Jane', lastName: 'Doe' },
+        { id: 42, name: 'John', lastName: 'Doe' },
+      ],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      deleting: [23],
+      items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
+      currentMessage: expectedMessage,
+      finishingLogs: [expectedMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles error action for deleting', () => {
+    const error = new Error('No deleting here');
+    const expectedMessage = {
+      causedByError: error,
+      isError: true,
+      text: 'Failed to delete.',
+    };
+
+    const action = userResource.actions.setDeleteError(42, error);
+
+    const previousState = {
+      ...defaultState,
+      deleting: [23, 42],
+      items: [
+        { id: 23, name: 'Jane', lastName: 'Doe' },
+        { id: 42, name: 'John', lastName: 'Doe' },
+      ],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      deleting: [23],
+      items: [
+        { id: 23, name: 'Jane', lastName: 'Doe' },
+        { id: 42, name: 'John', lastName: 'Doe' },
+      ],
+      currentMessage: expectedMessage,
+      finishingLogs: [expectedMessage],
     };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);

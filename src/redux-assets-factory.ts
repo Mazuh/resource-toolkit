@@ -49,6 +49,11 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       step: 'DOING',
       identifying,
     }),
+    setDeleting: (identifying: GatewayIdentifying) => makeAction({
+      operation: 'DELETE',
+      step: 'DOING',
+      identifying,
+    }),
     setRead: (identifying?: GatewayIdentifying, content?: GatewayContent) => makeAction({
       operation: 'READ',
       step: 'SUCCESS',
@@ -61,6 +66,11 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       identifying,
       content,
     }),
+    setDeleted: (identifying: GatewayIdentifying) => makeAction({
+      operation: 'DELETE',
+      step: 'SUCCESS',
+      identifying,
+    }),
     setReadError: (identifying?: GatewayIdentifying, causedByError?: Error) => makeAction({
       operation: 'READ',
       step: 'ERROR',
@@ -69,6 +79,12 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
     }),
     setUpdateError: (identifying: GatewayIdentifying, causedByError?: Error) => makeAction({
       operation: 'UPDATE',
+      step: 'ERROR',
+      content: causedByError,
+      identifying,
+    }),
+    setDeleteError: (identifying?: GatewayIdentifying, causedByError?: Error) => makeAction({
+      operation: 'DELETE',
       step: 'ERROR',
       content: causedByError,
       identifying,
@@ -122,6 +138,15 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         dispatch(plainActions.setUpdated(identifying, content));
       } catch (error) {
         dispatch(plainActions.setUpdateError(identifying, error));
+      }
+    },
+    delete: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      dispatch(plainActions.setDeleting(identifying));
+      try {
+        await gateway.delete(...args);
+        dispatch(plainActions.setDeleted(identifying));
+      } catch (error) {
+        dispatch(plainActions.setDeleteError(identifying, error));
       }
     },
   };
@@ -190,6 +215,20 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
       if (isFinished) {
         updating.updating = state.updating.filter(id => id !== identifying);
+      }
+    }
+
+    if (operation === 'DELETE' && !Array.isArray(identifying) && identifying) {
+      if (isLoading) {
+        updating.deleting = [...state.deleting, identifying];
+      }
+
+      if (isSuccess) {
+        updating.items = state.items.filter(it => it[idKey] !== identifying);
+      }
+
+      if (isFinished) {
+        updating.deleting = state.deleting.filter(id => id !== identifying);
       }
     }
 

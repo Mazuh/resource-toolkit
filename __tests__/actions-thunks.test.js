@@ -33,6 +33,9 @@ describe('action factory with thunks, relying in other plain actions, for a work
       fetchUpdate: makeMockedFetchFn((id, updated) => ({
         data: { id, ...updated },
       })),
+      fetchDelete: makeMockedFetchFn(id => ({
+        data: { id },
+      })),
     };
 
     dispatch = jest.fn();
@@ -208,6 +211,27 @@ describe('action factory with thunks, relying in other plain actions, for a work
     done();
   });
 
+  it('on deleting one, dispatchs loading and done', async done => {
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      gateway: {
+        delete: async queryset => {
+          await UserRestfulAPI.fetchDelete(queryset.id);
+        },
+      },
+    });
+    const thunk = userResource.actions.delete(666, { id: 666 });
+
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setDeleting(666));
+    expect(dispatch).toBeCalledWith(userResource.actions.setDeleted(666));
+
+    done();
+  });
+
   it('on reading one, dispatchs loading and error', async done => {
     const error = new Error('Programming error');
     const userResource = makeReduxAssets({
@@ -276,6 +300,26 @@ describe('action factory with thunks, relying in other plain actions, for a work
     expect(dispatch).toBeCalledTimes(2);
     expect(dispatch).toBeCalledWith(userResource.actions.setUpdating(42));
     expect(dispatch).toBeCalledWith(userResource.actions.setUpdateError(42, error));
+
+    done();
+  });
+
+  it('on deleting, dispatchs loading and error', async done => {
+    const error = new Error('Programming error');
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      gateway: {
+        delete: () => Promise.reject(error),
+      },
+    });
+    const thunk = userResource.actions.delete(42);
+
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setDeleting(42));
+    expect(dispatch).toBeCalledWith(userResource.actions.setDeleteError(42, error));
 
     done();
   });

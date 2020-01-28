@@ -54,4 +54,5 @@ export interface Gateway {
   readOne?: (...args: any[]) => Promise<Entity>;
   readMany?: (...args: any[]) => Promise<Entity[]>;
   update?: (...args: any[]) => Promise<Entity>;
+  delete?: (...args: any[]) => Promise<void>,
 }
