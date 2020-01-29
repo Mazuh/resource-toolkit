@@ -11,12 +11,8 @@ const defaultState = {
   currentMessage: null,
 };
 
-describe('reducer factory', () => {
-  let userResource;
-
-  beforeEach(() => {
-    userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
-  });
+describe('reducer factory: commons', () => {
+  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
 
   it('has initial state', () => {
     expect(userResource.reducer()).toEqual(defaultState);
@@ -85,14 +81,14 @@ describe('reducer factory', () => {
   it('supports adapter of error messages', () => {
     const adapter = jest.fn(() => 'Any custom message here!');
 
-    userResource = makeReduxAssets({
+    const customResource = makeReduxAssets({
       name: 'USER',
       idKey: 'id',
       makeMessageText: adapter,
     });
 
     const error = new Error('Weird random programming error at reading');
-    const action = userResource.actions.setReadError([1, 2], error);
+    const action = customResource.actions.setReadError([1, 2], error);
 
     const expectedErrorMessage = {
       text: 'Any custom message here!',
@@ -110,7 +106,7 @@ describe('reducer factory', () => {
       currentMessage: expectedErrorMessage,
     };
 
-    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+    expect(customResource.reducer(previousState, action)).toEqual(expectedCurrentState);
 
     const isError = true;
     expect(adapter).toBeCalledWith(error, 'READ', isError);
@@ -133,6 +129,19 @@ describe('reducer factory', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
+  it('handles items clearing', () => {
+    const action = userResource.actions.clearItems();
+
+    const previousState = { ...defaultState, items: ['a', 'b', 'c'] };
+    const expectedCurrentState = { ...defaultState, items: [] };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+});
+
+describe('reducer factory: create', () => {
+  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+
   it('handles loading action for creating', () => {
     const action = userResource.actions.setCreating();
 
@@ -141,42 +150,6 @@ describe('reducer factory', () => {
       ...defaultState,
       isCreating: true,
     };
-
-    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
-  });
-
-  it('handles loading action for reading blindly', () => {
-    const action = userResource.actions.setReading();
-
-    const previousState = { ...defaultState };
-    const expectedCurrentState = {
-      ...defaultState,
-      isReadingBlindly: true,
-    };
-
-    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
-  });
-
-  it('handles loading action for updating', () => {
-    const action = userResource.actions.setUpdating(42);
-
-    const previousState = {
-      ...defaultState,
-      updating: [3],
-    };
-    const expectedCurrentState = {
-      ...defaultState,
-      updating: [3, 42],
-    };
-
-    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
-  });
-
-  it('handles loading action for deleting', () => {
-    const action = userResource.actions.setDeleting(3);
-
-    const previousState = { ...defaultState, deleting: [9, 4] };
-    const expectedCurrentState = { ...defaultState, deleting: [9, 4, 3] };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
@@ -208,6 +181,48 @@ describe('reducer factory', () => {
       ],
       currentMessage: expectedMessage,
       finishingLogs: [expectedMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles error action for creating', () => {
+    const error = new Error('No creation here');
+    const expectedMessage = {
+      causedByError: error,
+      isError: true,
+      text: 'Failed to create.',
+    };
+
+    const action = userResource.actions.setCreateError(error);
+
+    const previousState = {
+      ...defaultState,
+      isCreating: true,
+      items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      isCreating: false,
+      items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
+      currentMessage: expectedMessage,
+      finishingLogs: [expectedMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+});
+
+describe('reducer factory: read', () => {
+  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+
+  it('handles loading action for reading blindly', () => {
+    const action = userResource.actions.setReading();
+
+    const previousState = { ...defaultState };
+    const expectedCurrentState = {
+      ...defaultState,
+      isReadingBlindly: true,
     };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
@@ -288,6 +303,25 @@ describe('reducer factory', () => {
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
+});
+
+describe('reducer factory: update', () => {
+  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+
+  it('handles loading action for updating', () => {
+    const action = userResource.actions.setUpdating(42);
+
+    const previousState = {
+      ...defaultState,
+      updating: [3],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      updating: [3, 42],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
 
   it('handles success action for updating', () => {
     const expectedMessage = {
@@ -344,6 +378,19 @@ describe('reducer factory', () => {
       finishingLogs: [expectedMessage],
       currentMessage: expectedMessage,
     };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+});
+
+describe('reducer factory: delete', () => {
+  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+
+  it('handles loading action for deleting', () => {
+    const action = userResource.actions.setDeleting(3);
+
+    const previousState = { ...defaultState, deleting: [9, 4] };
+    const expectedCurrentState = { ...defaultState, deleting: [9, 4, 3] };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
@@ -404,41 +451,6 @@ describe('reducer factory', () => {
       currentMessage: expectedMessage,
       finishingLogs: [expectedMessage],
     };
-
-    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
-  });
-
-  it('handles error action for creation', () => {
-    const error = new Error('No creation here');
-    const expectedMessage = {
-      causedByError: error,
-      isError: true,
-      text: 'Failed to create.',
-    };
-
-    const action = userResource.actions.setCreateError(error);
-
-    const previousState = {
-      ...defaultState,
-      isCreating: true,
-      items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
-    };
-    const expectedCurrentState = {
-      ...defaultState,
-      isCreating: false,
-      items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
-      currentMessage: expectedMessage,
-      finishingLogs: [expectedMessage],
-    };
-
-    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
-  });
-
-  it('handles items clearing', () => {
-    const action = userResource.actions.clearItems();
-
-    const previousState = { ...defaultState, items: ['a', 'b', 'c'] };
-    const expectedCurrentState = { ...defaultState, items: [] };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
