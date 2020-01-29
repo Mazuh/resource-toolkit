@@ -7,6 +7,9 @@ describe('action factory with thunks, relying in other plain actions, for a work
 
   beforeEach(() => {
     UserRestfulAPI = {
+      fetchCreate: makeMockedFetchFn(creation => ({
+        data: { id: 123, ...creation },
+      })),
       fetchOne: makeMockedFetchFn(id => ({
         data: {
           id,
@@ -70,6 +73,31 @@ describe('action factory with thunks, relying in other plain actions, for a work
     await userResource.actions.update(1, { my: 'args' }, 'many', 123)(dispatch);
     expect(gatewayUpdate).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayUpdate.mockClear();
+
+    done();
+  });
+
+  it('on creating, dispatchs loading and done', async done => {
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      gateway: {
+        create: async creation => {
+          const response = await UserRestfulAPI.fetchCreate(creation);
+          const body = await response.json();
+          return body['data'];
+        },
+      },
+    });
+    const data = { firstName: 'Crash', lastName: 'Bandicoot' };
+    const expectedData = { ...data, id: 123 };
+    const thunk = userResource.actions.create(data);
+
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setCreating());
+    expect(dispatch).toBeCalledWith(userResource.actions.setCreated(expectedData));
 
     done();
   });

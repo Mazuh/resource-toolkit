@@ -39,6 +39,10 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
   type GatewayIdentifying = Identifier | Identifier[];
   type GatewayContent = Entity | Entity[];
   const plainActions = {
+    setCreating: () => makeAction({
+      operation: 'CREATE',
+      step: 'DOING',
+    }),
     setReading: (identifying: GatewayIdentifying = null) => makeAction({
       operation: 'READ',
       step: 'DOING',
@@ -66,10 +70,20 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       identifying,
       content,
     }),
+    setCreated: (content: GatewayContent) => makeAction({
+      operation: 'CREATE',
+      step: 'SUCCESS',
+      content,
+    }),
     setDeleted: (identifying: GatewayIdentifying) => makeAction({
       operation: 'DELETE',
       step: 'SUCCESS',
       identifying,
+    }),
+    setCreateError: (causedByError?: Error) => makeAction({
+      operation: 'CREATE',
+      step: 'ERROR',
+      content: causedByError,
     }),
     setReadError: (identifying?: GatewayIdentifying, causedByError?: Error) => makeAction({
       operation: 'READ',
@@ -103,6 +117,15 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
   const actions = {
     ...plainActions,
+    create: (...args: any[]) => async (dispatch: BoundDispatch) => {
+      dispatch(plainActions.setCreating());
+      try {
+        const content = await gateway.create(...args);
+        dispatch(plainActions.setCreated(content));
+      } catch (error) {
+        dispatch(plainActions.setCreateError(error));
+      }
+    },
     readOne: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading(identifying));
       try {
@@ -170,6 +193,24 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
     const isFinished = isSuccess || isError;
 
     const updating = { ...state };
+
+    if (operation === 'CREATE') {
+      if (isLoading) {
+        updating.isCreating = true;
+      }
+
+      if (isSuccess) {
+        if (Array.isArray(content)) {
+          updating.items = [...state.items, ...content];
+        } else if (content) {
+          updating.items = [...state.items, content];
+        }
+      }
+
+      if (isFinished) {
+        updating.isCreating = false;
+      }
+    }
 
     if (operation === 'READ') {
       if (isLoading) {

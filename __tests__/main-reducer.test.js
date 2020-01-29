@@ -133,6 +133,18 @@ describe('reducer factory', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
+  it('handles loading action for creating', () => {
+    const action = userResource.actions.setCreating();
+
+    const previousState = { ...defaultState };
+    const expectedCurrentState = {
+      ...defaultState,
+      isCreating: true,
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
   it('handles loading action for reading blindly', () => {
     const action = userResource.actions.setReading();
 
@@ -165,6 +177,78 @@ describe('reducer factory', () => {
 
     const previousState = { ...defaultState, deleting: [9, 4] };
     const expectedCurrentState = { ...defaultState, deleting: [9, 4, 3] };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles success action for creating', () => {
+    const expectedMessage = {
+      causedByError: null,
+      isError: false,
+      text: 'Successfully created.',
+    };
+
+    const action = userResource.actions.setCreated({
+      id: 42,
+      name: 'Marcell',
+      lastName: 'Guilherme',
+    });
+
+    const previousState = {
+      ...defaultState,
+      isCreating: true,
+      items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      isCreating: false,
+      items: [
+        { id: 23, name: 'Jane', lastName: 'Doe' },
+        { id: 42, name: 'Marcell', lastName: 'Guilherme' },
+      ],
+      currentMessage: expectedMessage,
+      finishingLogs: [expectedMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles success action for creating many', () => {
+    const expectedMessage = {
+      causedByError: null,
+      isError: false,
+      text: 'Successfully created. Related to 2 items.',
+    };
+
+    const action = userResource.actions.setCreated([
+      {
+        id: 42,
+        name: 'Marcell',
+        lastName: 'Guilherme',
+      },
+      {
+        id: 12,
+        name: 'Wallys',
+        lastName: 'Lima',
+      },
+    ]);
+
+    const previousState = {
+      ...defaultState,
+      isCreating: true,
+      items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      isCreating: false,
+      items: [
+        { id: 23, name: 'Jane', lastName: 'Doe' },
+        { id: 42, name: 'Marcell', lastName: 'Guilherme' },
+        { id: 12, name: 'Wallys', lastName: 'Lima' },
+      ],
+      currentMessage: expectedMessage,
+      finishingLogs: [expectedMessage],
+    };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
@@ -317,6 +401,32 @@ describe('reducer factory', () => {
         { id: 23, name: 'Jane', lastName: 'Doe' },
         { id: 42, name: 'John', lastName: 'Doe' },
       ],
+      currentMessage: expectedMessage,
+      finishingLogs: [expectedMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles error action for creation', () => {
+    const error = new Error('No creation here');
+    const expectedMessage = {
+      causedByError: error,
+      isError: true,
+      text: 'Failed to create.',
+    };
+
+    const action = userResource.actions.setCreateError(error);
+
+    const previousState = {
+      ...defaultState,
+      isCreating: true,
+      items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      isCreating: false,
+      items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
       currentMessage: expectedMessage,
       finishingLogs: [expectedMessage],
     };
