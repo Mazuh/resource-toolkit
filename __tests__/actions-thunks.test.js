@@ -1,46 +1,10 @@
 import { makeReduxAssets } from '../src';
 import { makeMockedFetchFn, defaultEmptyMeta, defaultPaginatedMeta } from './mock-utils';
 
-describe('action factory with thunks, relying in other plain actions, for a working API', () => {
-  let UserRestfulAPI;
+describe('action creator factory for thunks: create', () => {
   let dispatch;
 
   beforeEach(() => {
-    UserRestfulAPI = {
-      fetchCreate: makeMockedFetchFn(creation => ({
-        data: { id: 123, ...creation },
-      })),
-      fetchOne: makeMockedFetchFn(id => ({
-        data: {
-          id,
-          firstName: 'Marcell',
-          lastName: 'Guilherme',
-        },
-        meta: defaultEmptyMeta,
-      })),
-      fetchMany: makeMockedFetchFn({
-        data: [
-          {
-            id: 69,
-            firstName: 'Marcell',
-            lastName: 'Guilherme',
-          },
-          {
-            id: 42,
-            firstName: 'Crash',
-            lastName: 'Bandicoot',
-          },
-        ],
-        meta: defaultPaginatedMeta,
-      }),
-      fetchUpdate: makeMockedFetchFn((id, updated) => ({
-        data: { id, ...updated },
-      })),
-      fetchDelete: makeMockedFetchFn(id => ({
-        data: { id },
-      })),
-    };
-
     dispatch = jest.fn();
   });
 
@@ -48,6 +12,7 @@ describe('action factory with thunks, relying in other plain actions, for a work
     const gatewayFetchOne = jest.fn(() => Promise.resolve({}));
     const gatewayFetchMany = jest.fn(() => Promise.resolve([]));
     const gatewayUpdate = jest.fn(() => Promise.resolve({}));
+    const gatewayDelete = jest.fn(() => Promise.resolve({}));
     const userResource = makeReduxAssets({
       name: 'USER',
       idKey: 'id',
@@ -55,6 +20,7 @@ describe('action factory with thunks, relying in other plain actions, for a work
         readOne: gatewayFetchOne,
         readMany: gatewayFetchMany,
         update: gatewayUpdate,
+        delete: gatewayDelete,
       },
     });
 
@@ -74,7 +40,26 @@ describe('action factory with thunks, relying in other plain actions, for a work
     expect(gatewayUpdate).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayUpdate.mockClear();
 
+    await userResource.actions.delete(1, { my: 'args' }, 'many', 123)(dispatch);
+    expect(gatewayDelete).toBeCalledWith({ my: 'args' }, 'many', 123);
+    gatewayDelete.mockClear();
+
     done();
+  });
+});
+
+describe('action creator factory for thunks: create', () => {
+  let UserRestfulAPI;
+  let dispatch;
+
+  beforeEach(() => {
+    UserRestfulAPI = {
+      fetchCreate: makeMockedFetchFn(creation => ({
+        data: { id: 123, ...creation },
+      })),
+    };
+
+    dispatch = jest.fn();
   });
 
   it('on creating, dispatchs loading and done', async done => {
@@ -100,6 +85,41 @@ describe('action factory with thunks, relying in other plain actions, for a work
     expect(dispatch).toBeCalledWith(userResource.actions.setCreated(expectedData));
 
     done();
+  });
+});
+
+describe('action creator factory for thunks: read', () => {
+  let UserRestfulAPI;
+  let dispatch;
+
+  beforeEach(() => {
+    UserRestfulAPI = {
+      fetchOne: makeMockedFetchFn(id => ({
+        data: {
+          id,
+          firstName: 'Marcell',
+          lastName: 'Guilherme',
+        },
+        meta: defaultEmptyMeta,
+      })),
+      fetchMany: makeMockedFetchFn({
+        data: [
+          {
+            id: 69,
+            firstName: 'Marcell',
+            lastName: 'Guilherme',
+          },
+          {
+            id: 42,
+            firstName: 'Crash',
+            lastName: 'Bandicoot',
+          },
+        ],
+        meta: defaultPaginatedMeta,
+      }),
+    };
+
+    dispatch = jest.fn();
   });
 
   it('on reading many blindly, dispatchs loading and done', async done => {
@@ -239,27 +259,6 @@ describe('action factory with thunks, relying in other plain actions, for a work
     done();
   });
 
-  it('on deleting one, dispatchs loading and done', async done => {
-    const userResource = makeReduxAssets({
-      name: 'USER',
-      idKey: 'id',
-      gateway: {
-        delete: async queryset => {
-          await UserRestfulAPI.fetchDelete(queryset.id);
-        },
-      },
-    });
-    const thunk = userResource.actions.delete(666, { id: 666 });
-
-    await thunk(dispatch);
-
-    expect(dispatch).toBeCalledTimes(2);
-    expect(dispatch).toBeCalledWith(userResource.actions.setDeleting(666));
-    expect(dispatch).toBeCalledWith(userResource.actions.setDeleted(666));
-
-    done();
-  });
-
   it('on reading one, dispatchs loading and error', async done => {
     const error = new Error('Programming error');
     const userResource = makeReduxAssets({
@@ -277,6 +276,21 @@ describe('action factory with thunks, relying in other plain actions, for a work
     expect(dispatch).toBeCalledWith(userResource.actions.setReadError(69, error));
 
     done();
+  });
+});
+
+describe('action creator factory for thunks: update', () => {
+  let UserRestfulAPI;
+  let dispatch;
+
+  beforeEach(() => {
+    UserRestfulAPI = {
+      fetchUpdate: makeMockedFetchFn((id, updated) => ({
+        data: { id, ...updated },
+      })),
+    };
+
+    dispatch = jest.fn();
   });
 
   it('on updating, dispatchs loading, clear and done', async done => {
@@ -328,6 +342,42 @@ describe('action factory with thunks, relying in other plain actions, for a work
     expect(dispatch).toBeCalledTimes(2);
     expect(dispatch).toBeCalledWith(userResource.actions.setUpdating(42));
     expect(dispatch).toBeCalledWith(userResource.actions.setUpdateError(42, error));
+
+    done();
+  });
+});
+
+describe('action creator factory for thunks: delete', () => {
+  let UserRestfulAPI;
+  let dispatch;
+
+  beforeEach(() => {
+    UserRestfulAPI = {
+      fetchDelete: makeMockedFetchFn(id => ({
+        data: { id },
+      })),
+    };
+
+    dispatch = jest.fn();
+  });
+
+  it('on deleting one, dispatchs loading and done', async done => {
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      gateway: {
+        delete: async queryset => {
+          await UserRestfulAPI.fetchDelete(queryset.id);
+        },
+      },
+    });
+    const thunk = userResource.actions.delete(666, { id: 666 });
+
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setDeleting(666));
+    expect(dispatch).toBeCalledWith(userResource.actions.setDeleted(666));
 
     done();
   });
