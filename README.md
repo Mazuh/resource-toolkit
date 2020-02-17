@@ -115,6 +115,7 @@ besides implementing the gateway layer:
   reading: [], // if reading thunk already knows the ids of what is being retrieved, it'll be stored here
   updating: [], // to store ids of what entities are being currently updated
   deleting: [], // to store ids of what entities are being currently deleted
+  isLoading: false, // generic flag that is true if any of the loading utils above is filled
   finishingLogs: [], // to store all logs (you can leave the default parser or implement it you by yourself)
   currentMessage: null, // last log (if it's an error, it may include the original exception for debugging)
 }
