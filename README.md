@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  Async resource management util.
+  Async and RESTful resource management tool.
 </p>
 
 <p align="center">

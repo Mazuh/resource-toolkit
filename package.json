@@ -1,7 +1,7 @@
 {
   "name": "resource-toolkit",
   "version": "0.8.0",
-  "description": "Async resource management util.",
+  "description": "Async and RESTful resource management tool.",
   "main": "dist/bundle.js",
   "engines": {
     "node": ">=12.0.0"
