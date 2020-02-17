@@ -8,6 +8,7 @@ const defaultState = {
   reading: [],
   updating: [],
   deleting: [],
+  isLoading: false,
   finishingLogs: [],
   currentMessage: null,
   relatedsTo: {},
@@ -151,6 +152,7 @@ describe('reducer factory: create', () => {
     const expectedCurrentState = {
       ...defaultState,
       isCreating: true,
+      isLoading: true,
     };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
@@ -225,6 +227,7 @@ describe('reducer factory: read', () => {
     const expectedCurrentState = {
       ...defaultState,
       isReadingBlindly: true,
+      isLoading: true,
     };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
@@ -253,11 +256,13 @@ describe('reducer factory: read', () => {
     const previousState = {
       ...defaultState,
       isCreating: true,
+      isLoading: true,
       items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
     };
     const expectedCurrentState = {
       ...defaultState,
       isCreating: false,
+      isLoading: false,
       items: [
         { id: 23, name: 'Jane', lastName: 'Doe' },
         { id: 42, name: 'Marcell', lastName: 'Guilherme' },
@@ -316,10 +321,12 @@ describe('reducer factory: update', () => {
     const previousState = {
       ...defaultState,
       updating: [3],
+      isLoading: true,
     };
     const expectedCurrentState = {
       ...defaultState,
       updating: [3, 42],
+      isLoading: true,
     };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
@@ -341,6 +348,7 @@ describe('reducer factory: update', () => {
     const previousState = {
       ...defaultState,
       updating: [23, 42],
+      isLoading: true,
       items: [
         { id: 23, name: 'Jane', lastName: 'Doe' },
         { id: 42, name: 'John', lastName: 'Doe' },
@@ -349,6 +357,7 @@ describe('reducer factory: update', () => {
     const expectedCurrentState = {
       ...defaultState,
       updating: [23],
+      isLoading: true,
       items: [
         { id: 23, name: 'Jane', lastName: 'Doe' },
         { id: 42, name: 'Marcell', lastName: 'Guilherme' },
@@ -373,10 +382,12 @@ describe('reducer factory: update', () => {
     const previousState = {
       ...defaultState,
       updating: [23, 42],
+      isLoading: true,
     };
     const expectedCurrentState = {
       ...defaultState,
       updating: [23],
+      isLoading: true,
       finishingLogs: [expectedMessage],
       currentMessage: expectedMessage,
     };
@@ -391,8 +402,8 @@ describe('reducer factory: delete', () => {
   it('handles loading action for deleting', () => {
     const action = userResource.actions.setDeleting(3);
 
-    const previousState = { ...defaultState, deleting: [9, 4] };
-    const expectedCurrentState = { ...defaultState, deleting: [9, 4, 3] };
+    const previousState = { ...defaultState, deleting: [9, 4], isLoading: true };
+    const expectedCurrentState = { ...defaultState, deleting: [9, 4, 3], isLoading: true };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
@@ -409,6 +420,7 @@ describe('reducer factory: delete', () => {
     const previousState = {
       ...defaultState,
       deleting: [23, 42],
+      isLoading: true,
       items: [
         { id: 23, name: 'Jane', lastName: 'Doe' },
         { id: 42, name: 'John', lastName: 'Doe' },
@@ -417,6 +429,7 @@ describe('reducer factory: delete', () => {
     const expectedCurrentState = {
       ...defaultState,
       deleting: [23],
+      isLoading: true,
       items: [{ id: 23, name: 'Jane', lastName: 'Doe' }],
       currentMessage: expectedMessage,
       finishingLogs: [expectedMessage],
@@ -438,6 +451,7 @@ describe('reducer factory: delete', () => {
     const previousState = {
       ...defaultState,
       deleting: [23, 42],
+      isLoading: true,
       items: [
         { id: 23, name: 'Jane', lastName: 'Doe' },
         { id: 42, name: 'John', lastName: 'Doe' },
@@ -445,6 +459,7 @@ describe('reducer factory: delete', () => {
     };
     const expectedCurrentState = {
       ...defaultState,
+      isLoading: true,
       deleting: [23],
       items: [
         { id: 23, name: 'Jane', lastName: 'Doe' },
@@ -492,10 +507,12 @@ describe('reducer factory: read relateds', () => {
     const previousState = {
       ...defaultState,
       isReadingBlindly: true,
+      isLoading: true,
     };
     const expectedCurrentState = {
       ...defaultState,
       isReadingBlindly: false,
+      isLoading: false,
       items: expectedReadData,
       currentMessage: expectedMessage,
       finishingLogs: [expectedMessage],
@@ -519,6 +536,7 @@ describe('reducer factory: read relateds', () => {
 
     const previousState = {
       ...defaultState,
+      isLoading: false,
       relatedsTo: {
         42: {
           books: { items: [], isLoading: false },
@@ -532,6 +550,7 @@ describe('reducer factory: read relateds', () => {
     };
     const expectedCurrentState = {
       ...defaultState,
+      isLoading: true,
       relatedsTo: {
         42: {
           books: { items: [], isLoading: true },

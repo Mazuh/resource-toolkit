@@ -345,6 +345,18 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
     }
 
+    const isDoingSomethingOnItself = updating.isCreating
+      || updating.isReadingBlindly
+      || updating.reading.length > 0
+      || updating.updating.length > 0
+      || updating.deleting.length > 0;
+    const isDoingSomethingOnRelateds = Object.keys(updating.relatedsTo).some((id) => {
+      return Object.keys(updating.relatedsTo[id]).some((relatedKey) => {
+        return updating.relatedsTo[id][relatedKey].isLoading;
+      });
+    });
+    updating.isLoading = isDoingSomethingOnItself || isDoingSomethingOnRelateds;
+
     if (operation === 'CLEAR_ITEMS') {
       updating.items = [];
     } else if (operation === 'CLEAR_CURRENT_MESSAGE') {

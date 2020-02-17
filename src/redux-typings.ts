@@ -1,12 +1,13 @@
 export interface ResourceState {
   items: Entity[];
-  relatedsTo: IndexedRelationships,
-  isCreating: boolean,
-  isReadingBlindly: boolean,
+  relatedsTo: IndexedRelationships;
+  isCreating: boolean;
+  isReadingBlindly: boolean;
   reading: Identifier[];
   updating: Identifier[];
   deleting: Identifier[];
-  finishingLogs: Message[],
+  isLoading: boolean;
+  finishingLogs: Message[];
   currentMessage?: Message;
 }
 
@@ -86,6 +87,7 @@ export const EMPTY_INITIAL_STATE: ResourceState = Object.freeze({
   reading: [],
   updating: [],
   deleting: [],
+  isLoading: false,
   finishingLogs: [],
   currentMessage: null,
 });
