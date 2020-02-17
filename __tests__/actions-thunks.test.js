@@ -1,7 +1,7 @@
 import { makeReduxAssets } from '../src';
 import { makeMockedFetchFn, defaultEmptyMeta, defaultPaginatedMeta } from './mock-utils';
 
-describe('action creator factory for thunks: create', () => {
+describe('action creator factory for thunks: commons', () => {
   let dispatch;
 
   beforeEach(() => {
@@ -13,6 +13,7 @@ describe('action creator factory for thunks: create', () => {
     const gatewayFetchMany = jest.fn(() => Promise.resolve([]));
     const gatewayUpdate = jest.fn(() => Promise.resolve({}));
     const gatewayDelete = jest.fn(() => Promise.resolve({}));
+    const gatewayFetchRelated = jest.fn(() => Promise.resolve([]));
     const userResource = makeReduxAssets({
       name: 'USER',
       idKey: 'id',
@@ -21,6 +22,7 @@ describe('action creator factory for thunks: create', () => {
         readMany: gatewayFetchMany,
         update: gatewayUpdate,
         delete: gatewayDelete,
+        readRelated: gatewayFetchRelated,
       },
     });
 
@@ -43,6 +45,10 @@ describe('action creator factory for thunks: create', () => {
     await userResource.actions.delete(1, { my: 'args' }, 'many', 123)(dispatch);
     expect(gatewayDelete).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayDelete.mockClear();
+
+    await userResource.actions.readRelated(1, '?', { my: 'args' }, 'many', 123)(dispatch);
+    expect(gatewayFetchRelated).toBeCalledWith(1, '?', { my: 'args' }, 'many', 123);
+    gatewayFetchRelated.mockClear();
 
     done();
   });
@@ -398,6 +404,94 @@ describe('action creator factory for thunks: delete', () => {
     expect(dispatch).toBeCalledTimes(2);
     expect(dispatch).toBeCalledWith(userResource.actions.setDeleting(42));
     expect(dispatch).toBeCalledWith(userResource.actions.setDeleteError(42, error));
+
+    done();
+  });
+});
+
+describe('action creator factory for thunks: read relateds', () => {
+  let UserBookRestfulAPI;
+  let dispatch;
+
+  beforeEach(() => {
+    UserBookRestfulAPI = {
+      fetchMany: makeMockedFetchFn({
+        data: [
+          {
+            id: 1,
+            title: 'Clean Coder',
+          },
+          {
+            id: 42,
+            title: 'Introduction to Algorithms',
+          },
+        ],
+      }),
+    };
+
+    dispatch = jest.fn();
+  });
+
+  it('on reading relateds, dispatchs loading and done', async done => {
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      relatedKeys: {
+        books: 'many',
+      },
+      gateway: {
+        readRelated: async (userId, relationshipKey, queryset) => {
+          const response = await UserBookRestfulAPI.fetchMany(userId, queryset);
+          const body = await response.json();
+          return body['data'];
+        },
+      },
+    });
+
+    const userId = 42;
+    const thunk = userResource.actions.readRelated(userId, 'books');
+    const expectedReadData = [
+      {
+        id: 1,
+        title: 'Clean Coder',
+      },
+      {
+        id: 42,
+        title: 'Introduction to Algorithms',
+      },
+    ];
+
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setRelatedLoading(42, 'books'));
+    expect(dispatch).toBeCalledWith(
+      userResource.actions.setRelatedLoaded(42, 'books', expectedReadData),
+    );
+
+    done();
+  });
+
+  it('on reading relateds, may dispatch loading and error', async done => {
+    const error = new Error('oh no, error on fetching stuff');
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      relatedKeys: {
+        books: 'many',
+      },
+      gateway: {
+        readRelated: jest.fn(() => Promise.reject(error)),
+      },
+    });
+
+    const userId = 42;
+    const thunk = userResource.actions.readRelated(userId, 'books');
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setRelatedLoading(42, 'books'));
+    expect(dispatch).toBeCalledWith(userResource.actions.setRelatedError(42, 'books', error));
 
     done();
   });

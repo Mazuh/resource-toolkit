@@ -1,4 +1,5 @@
 import { makeReduxAssets } from '../src';
+import { MANY_RELATED, ONE_RELATED } from '../src/redux-typings';
 
 const defaultState = {
   items: [],
@@ -9,10 +10,11 @@ const defaultState = {
   deleting: [],
   finishingLogs: [],
   currentMessage: null,
+  relatedsTo: {},
 };
 
 describe('reducer factory: commons', () => {
-  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+  const userResource = makeReduxAssets({ name: 'USER' });
 
   it('has initial state', () => {
     expect(userResource.reducer()).toEqual(defaultState);
@@ -450,6 +452,182 @@ describe('reducer factory: delete', () => {
       ],
       currentMessage: expectedMessage,
       finishingLogs: [expectedMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+});
+
+describe('reducer factory: read relateds', () => {
+  const userResource = makeReduxAssets({
+    name: 'USER',
+    idKey: 'id',
+    relatedKeys: {
+      address: ONE_RELATED,
+      books: MANY_RELATED,
+    },
+  });
+
+  it('sets initial values on relations dict for each read entity', () => {
+    const expectedReadData = [
+      {
+        id: 69,
+        firstName: 'Marcell',
+        lastName: 'Guilherme',
+      },
+      {
+        id: 42,
+        firstName: 'Crash',
+        lastName: 'Bandicoot',
+      },
+    ];
+    const expectedMessage = {
+      causedByError: null,
+      isError: false,
+      text: 'Successfully fetched data. Related to 2 items.',
+    };
+
+    const action = userResource.actions.setRead(null, expectedReadData);
+
+    const previousState = {
+      ...defaultState,
+      isReadingBlindly: true,
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      isReadingBlindly: false,
+      items: expectedReadData,
+      currentMessage: expectedMessage,
+      finishingLogs: [expectedMessage],
+      relatedsTo: {
+        42: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+      },
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles loading action for reading', () => {
+    const action = userResource.actions.setRelatedLoading(42, 'books');
+
+    const previousState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+      },
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: { items: [], isLoading: true },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+      },
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles success action for reading related', () => {
+    const action = userResource.actions.setRelatedLoaded(42, 'books', [
+      'fetched',
+      'related',
+      'stuff',
+    ]);
+
+    const expectedMessage = {
+      causedByError: null,
+      isError: false,
+      text: 'Successful on related data.',
+    };
+    const previousState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: { items: ['previous', 'values'], isLoading: true },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+      },
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: { items: ['fetched', 'related', 'stuff'], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+      },
+      currentMessage: expectedMessage,
+      finishingLogs: [expectedMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles error action for reading', () => {
+    const error = new Error('Weird error on reading related stuff');
+
+    const action = userResource.actions.setRelatedError(42, 'books', error);
+
+    const expectedErrorMessage = {
+      causedByError: error,
+      isError: true,
+      text: 'Fail on related data.',
+    };
+    const previousState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: { items: ['previous', 'values'], isLoading: true },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+      },
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: { items: ['previous', 'values'], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+      },
+      currentMessage: expectedErrorMessage,
+      finishingLogs: [expectedErrorMessage],
     };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);

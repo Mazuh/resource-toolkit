@@ -1,5 +1,6 @@
 export interface ResourceState {
   items: Entity[];
+  relatedsTo: IndexedRelationships,
   isCreating: boolean,
   isReadingBlindly: boolean,
   reading: Identifier[];
@@ -19,6 +20,7 @@ export interface ResourceIntent {
   step: Step;
   identifying?: Identifier | Identifier[];
   content?: Entity | Entity[] | Error;
+  relationshipKey?: string,
 }
 
 export type Step = (
@@ -32,6 +34,7 @@ export type Operation = (
   | 'READ'
   | 'UPDATE'
   | 'DELETE'
+  | 'RELATED'
   | 'CLEAR_ITEMS'
   | 'CLEAR_CURRENT_MESSAGE'
 );
@@ -46,9 +49,46 @@ export interface Entity {
   [key: string]: any;
 }
 
+export interface RelatedToOne {
+  item: Entity,
+  isLoading: boolean;
+}
+
+export interface RelatedToMany {
+  items: Entity[],
+  isLoading: boolean;
+}
+
+export interface Relationships {
+  [key: string]: (RelatedToOne | RelatedToMany);
+}
+
+export interface IndexedRelationships {
+  [key: string]: Relationships;
+};
+
+export const ONE_RELATED = 'one';
+export const MANY_RELATED = 'many';
+export type RelatedType = (
+  | typeof ONE_RELATED
+  | typeof MANY_RELATED
+);
+
 export type IdentifierKey = string;
 
 export type Identifier = string | number;
+
+export const EMPTY_INITIAL_STATE: ResourceState = Object.freeze({
+  items: [],
+  relatedsTo: {},
+  isCreating: false,
+  isReadingBlindly: false,
+  reading: [],
+  updating: [],
+  deleting: [],
+  finishingLogs: [],
+  currentMessage: null,
+});
 
 export interface Gateway {
   create?: (...args: any[]) => Promise<Entity | Entity[]>;
@@ -56,4 +96,5 @@ export interface Gateway {
   readMany?: (...args: any[]) => Promise<Entity[]>;
   update?: (...args: any[]) => Promise<Entity>;
   delete?: (...args: any[]) => Promise<void>,
+  readRelated?: (...args: any[]) => Promise<Entity | Entity[]>,
 }

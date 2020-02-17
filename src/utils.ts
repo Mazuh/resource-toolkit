@@ -12,6 +12,8 @@ export function makeDefaultMessageText(relating: Entity | Entity[], operation: O
       return (isError ? 'Failed to update.' : 'Successfully updated.');
     case 'DELETE':
       return (isError ? 'Failed to delete.' : 'Successfully deleted.');
+    case 'RELATED':
+      return (isError ? 'Fail on related data.' : 'Successful on related data.');
     default:
       return isError
         ? 'Unknown and unexpected error response.'

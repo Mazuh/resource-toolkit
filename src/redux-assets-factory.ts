@@ -1,20 +1,24 @@
-import { ResourceState, IdentifierKey, Gateway, Entity, Operation, ResourceAction, ResourceIntent, Identifier, Message } from './redux-typings';
+import {
+  ResourceState,
+  IdentifierKey,
+  Gateway,
+  Entity,
+  Operation,
+  ResourceAction,
+  ResourceIntent,
+  Identifier,
+  Message,
+  RelatedType,
+  RelatedToOne,
+  RelatedToMany,
+  EMPTY_INITIAL_STATE,
+} from './redux-typings';
 import { makeDefaultMessageText } from './utils';
-
-const initialState: ResourceState = {
-  items: [],
-  isCreating: false,
-  isReadingBlindly: false,
-  reading: [],
-  updating: [],
-  deleting: [],
-  finishingLogs: [],
-  currentMessage: null,
-};
 
 export type ResourceToolParams = {
   name: string;
   idKey: IdentifierKey;
+  relatedKeys: { [key: string]: RelatedType },
   gateway: Gateway;
   makeMessageText?: (relating: Entity | Entity[], operation: Operation, isError: boolean) => string;
 };
@@ -23,6 +27,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
     name,
     idKey,
     gateway,
+    relatedKeys = {},
     makeMessageText = makeDefaultMessageText,
   } = params;
 
@@ -58,6 +63,12 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       step: 'DOING',
       identifying,
     }),
+    setRelatedLoading: (ownerIdentifier: Identifier, relationshipKey: string) => makeAction({
+      operation: 'RELATED',
+      step: 'DOING',
+      identifying: ownerIdentifier,
+      relationshipKey,
+    }),
     setRead: (identifying?: GatewayIdentifying, content?: GatewayContent) => makeAction({
       operation: 'READ',
       step: 'SUCCESS',
@@ -79,6 +90,13 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       operation: 'DELETE',
       step: 'SUCCESS',
       identifying,
+    }),
+    setRelatedLoaded: (ownerIdentifier: Identifier, relationshipKey: string, content: GatewayContent) => makeAction({
+      operation: 'RELATED',
+      step: 'SUCCESS',
+      identifying: ownerIdentifier,
+      relationshipKey,
+      content,
     }),
     setCreateError: (causedByError?: Error) => makeAction({
       operation: 'CREATE',
@@ -102,6 +120,13 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       step: 'ERROR',
       content: causedByError,
       identifying,
+    }),
+    setRelatedError: (ownerIdentifier: Identifier, relationshipKey: string, causedByError?: Error) => makeAction({
+      operation: 'RELATED',
+      step: 'ERROR',
+      content: causedByError,
+      identifying: ownerIdentifier,
+      relationshipKey,
     }),
     clearItems: () => makeAction({
       operation: 'CLEAR_ITEMS',
@@ -172,7 +197,18 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         dispatch(plainActions.setDeleteError(identifying, error));
       }
     },
+    readRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+      try {
+        const content = await gateway.readRelated(ownerIdentifier, relationshipKey, ...args);
+        dispatch(plainActions.setRelatedLoaded(ownerIdentifier, relationshipKey, content));
+      } catch (error) {
+        dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+      }
+    },
   };
+
+  const initialState = EMPTY_INITIAL_STATE;
 
   const reducer = (state: ResourceState = initialState, action: BoundResourceActon): ResourceState => {
     if (!action || action.type !== actionType) {
@@ -185,6 +221,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       step,
       identifying,
       content,
+      relationshipKey,
     } = payload;
 
     const isLoading = step === 'DOING';
@@ -224,11 +261,28 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
 
       if (isSuccess) {
-        if (Array.isArray(content)) {
-          updating.items = [...state.items, ...content];
-        } else if (content) {
-          updating.items = [...state.items, content];
-        }
+        const items = Array.isArray(content) ? content : [content];
+
+        updating.items = [...state.items, ...items];
+
+        items.forEach((item: Entity) => {
+          const id = item[idKey];
+          updating.relatedsTo[id] = Object.keys(relatedKeys).reduce((acc, key) => {
+            const valueType = relatedKeys[key];
+            if (valueType === 'one') {
+              acc[key] = {
+                item: {},
+                isLoading: false,
+              } as RelatedToOne;
+            } else if (valueType === 'many') {
+              acc[key] = {
+                items: [],
+                isLoading: false,
+              } as RelatedToMany;
+            }
+            return acc;
+          }, {});
+        });
       }
 
       if (isFinished) {
@@ -273,6 +327,24 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
     }
 
+    if (operation === 'RELATED' && !Array.isArray(identifying) && updating.relatedsTo[identifying]) {
+      if (isLoading) {
+        updating.relatedsTo[identifying][relationshipKey].isLoading = true;
+      }
+
+      if (isSuccess) {
+        if (Array.isArray(content)) {
+          (updating.relatedsTo[identifying][relationshipKey] as RelatedToMany).items = content;
+        } else {
+          (updating.relatedsTo[identifying][relationshipKey] as RelatedToOne).item = content;
+        }
+      }
+
+      if (isFinished) {
+        updating.relatedsTo[identifying][relationshipKey].isLoading = false;
+      }
+    }
+
     if (operation === 'CLEAR_ITEMS') {
       updating.items = [];
     } else if (operation === 'CLEAR_CURRENT_MESSAGE') {
@@ -291,7 +363,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
   };
 
   return {
-    initialState: { ...initialState },
+    initialState,
     actionType,
     makeAction,
     actions,
