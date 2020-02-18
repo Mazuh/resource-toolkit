@@ -64,7 +64,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       identifying,
     }),
     setRelatedLoading: (ownerIdentifier: Identifier, relationshipKey: string) => makeAction({
-      operation: 'RELATED',
+      operation: 'RELATED_READ',
       step: 'DOING',
       identifying: ownerIdentifier,
       relationshipKey,
@@ -91,8 +91,8 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       step: 'SUCCESS',
       identifying,
     }),
-    setRelatedLoaded: (ownerIdentifier: Identifier, relationshipKey: string, content: GatewayContent) => makeAction({
-      operation: 'RELATED',
+    setRelatedRead: (ownerIdentifier: Identifier, relationshipKey: string, content: GatewayContent) => makeAction({
+      operation: 'RELATED_READ',
       step: 'SUCCESS',
       identifying: ownerIdentifier,
       relationshipKey,
@@ -122,7 +122,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       identifying,
     }),
     setRelatedError: (ownerIdentifier: Identifier, relationshipKey: string, causedByError?: Error) => makeAction({
-      operation: 'RELATED',
+      operation: 'RELATED_READ',
       step: 'ERROR',
       content: causedByError,
       identifying: ownerIdentifier,
@@ -201,7 +201,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
       try {
         const content = await gateway.readRelated(ownerIdentifier, relationshipKey, ...args);
-        dispatch(plainActions.setRelatedLoaded(ownerIdentifier, relationshipKey, content));
+        dispatch(plainActions.setRelatedRead(ownerIdentifier, relationshipKey, content));
       } catch (error) {
         dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
       }
@@ -327,7 +327,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
     }
 
-    if (operation === 'RELATED' && !Array.isArray(identifying) && updating.relatedsTo[identifying]) {
+    if (operation === 'RELATED_READ' && !Array.isArray(identifying) && updating.relatedsTo[identifying]) {
       updating.relatedsTo = { ...state.relatedsTo };
       updating.relatedsTo[identifying] = { ...updating.relatedsTo[identifying] };
       updating.relatedsTo[identifying][relationshipKey] = { ...updating.relatedsTo[identifying][relationshipKey] };

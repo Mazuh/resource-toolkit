@@ -466,7 +466,7 @@ describe('action creator factory for thunks: read relateds', () => {
     expect(dispatch).toBeCalledTimes(2);
     expect(dispatch).toBeCalledWith(userResource.actions.setRelatedLoading(42, 'books'));
     expect(dispatch).toBeCalledWith(
-      userResource.actions.setRelatedLoaded(42, 'books', expectedReadData),
+      userResource.actions.setRelatedRead(42, 'books', expectedReadData),
     );
 
     done();

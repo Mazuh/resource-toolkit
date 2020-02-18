@@ -567,7 +567,7 @@ describe('reducer factory: read relateds', () => {
   });
 
   it('handles success action for reading related', () => {
-    const action = userResource.actions.setRelatedLoaded(42, 'books', [
+    const action = userResource.actions.setRelatedRead(42, 'books', [
       'fetched',
       'related',
       'stuff',
@@ -576,7 +576,7 @@ describe('reducer factory: read relateds', () => {
     const expectedMessage = {
       causedByError: null,
       isError: false,
-      text: 'Successful on related data.',
+      text: 'Successful to read related data.',
     };
     const previousState = {
       ...defaultState,
@@ -618,7 +618,7 @@ describe('reducer factory: read relateds', () => {
     const expectedErrorMessage = {
       causedByError: error,
       isError: true,
-      text: 'Fail on related data.',
+      text: 'Failed to read related data.',
     };
     const previousState = {
       ...defaultState,

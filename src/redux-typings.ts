@@ -35,7 +35,7 @@ export type Operation = (
   | 'READ'
   | 'UPDATE'
   | 'DELETE'
-  | 'RELATED'
+  | 'RELATED_READ'
   | 'CLEAR_ITEMS'
   | 'CLEAR_CURRENT_MESSAGE'
 );
