@@ -328,6 +328,10 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
     }
 
     if (operation === 'RELATED' && !Array.isArray(identifying) && updating.relatedsTo[identifying]) {
+      updating.relatedsTo = { ...state.relatedsTo };
+      updating.relatedsTo[identifying] = { ...updating.relatedsTo[identifying] };
+      updating.relatedsTo[identifying][relationshipKey] = { ...updating.relatedsTo[identifying][relationshipKey] };
+
       if (isLoading) {
         updating.relatedsTo[identifying][relationshipKey].isLoading = true;
       }
