@@ -496,3 +496,82 @@ describe('action creator factory for thunks: read relateds', () => {
     done();
   });
 });
+
+describe('action creator factory for thunks: update relateds', () => {
+  let UserBookRestfulAPI;
+  let dispatch;
+
+  beforeEach(() => {
+    UserBookRestfulAPI = {
+      update: makeMockedFetchFn((hosterId, updated) => ({
+        data: { ...updated },
+      })),
+    };
+
+    dispatch = jest.fn();
+  });
+
+  // const expectedReadData = [
+  //   { id: 42, title: 'Clean Coder', author: 'Uncle Bob' },
+  //   { id: 38, title: 'Introduction to Algorithms', author: 'Cormen/Leiserson/Rivest/Stein' },
+  // ];
+
+  it('on updating relateds, dispatchs loading and done', async done => {
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      relatedKeys: {
+        books: 'many',
+      },
+      gateway: {
+        updateRelated: async (userId, relationshipKey, queryset) => {
+          const response = await UserBookRestfulAPI.update(userId, queryset);
+          const body = await response.json();
+          return body['data'];
+        },
+      },
+    });
+
+    const userId = 42;
+    const updatingData = {
+      id: 42,
+      title: 'Clean Coder',
+      author: 'Uncle Bob',
+    };
+    const thunk = userResource.actions.updateRelated(userId, 'books', updatingData);
+
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setRelatedLoading(42, 'books'));
+    expect(dispatch).toBeCalledWith(
+      userResource.actions.setRelatedUpdated(42, 'books', updatingData),
+    );
+
+    done();
+  });
+
+  it('on updating relateds, may dispatch loading and error', async done => {
+    const error = new Error('oh no, error on fetching stuff');
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      relatedKeys: {
+        books: 'many',
+      },
+      gateway: {
+        updateRelated: jest.fn(() => Promise.reject(error)),
+      },
+    });
+
+    const userId = 42;
+    const thunk = userResource.actions.updateRelated(userId, 'books', {});
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setRelatedLoading(42, 'books'));
+    expect(dispatch).toBeCalledWith(userResource.actions.setRelatedError(42, 'books', error));
+
+    done();
+  });
+});

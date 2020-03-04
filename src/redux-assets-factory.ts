@@ -64,7 +64,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       identifying,
     }),
     setRelatedLoading: (ownerIdentifier: Identifier, relationshipKey: string) => makeAction({
-      operation: 'RELATED_READ',
+      operation: 'RELATED',
       step: 'DOING',
       identifying: ownerIdentifier,
       relationshipKey,
@@ -98,6 +98,13 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       relationshipKey,
       content,
     }),
+    setRelatedUpdated: (ownerIdentifier: Identifier, relationshipKey: string, content: GatewayContent) => makeAction({
+      operation: 'RELATED_UPDATED',
+      step: 'SUCCESS',
+      identifying: ownerIdentifier,
+      relationshipKey,
+      content,
+    }),
     setCreateError: (causedByError?: Error) => makeAction({
       operation: 'CREATE',
       step: 'ERROR',
@@ -122,7 +129,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       identifying,
     }),
     setRelatedError: (ownerIdentifier: Identifier, relationshipKey: string, causedByError?: Error) => makeAction({
-      operation: 'RELATED_READ',
+      operation: 'RELATED',
       step: 'ERROR',
       content: causedByError,
       identifying: ownerIdentifier,
@@ -202,6 +209,15 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       try {
         const content = await gateway.readRelated(ownerIdentifier, relationshipKey, ...args);
         dispatch(plainActions.setRelatedRead(ownerIdentifier, relationshipKey, content));
+      } catch (error) {
+        dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+      }
+    },
+    updateRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+      try {
+        const content = await gateway.updateRelated(ownerIdentifier, relationshipKey, ...args);
+        dispatch(plainActions.setRelatedUpdated(ownerIdentifier, relationshipKey, content));
       } catch (error) {
         dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
       }
@@ -327,20 +343,29 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
     }
 
-    if (operation === 'RELATED_READ' && !Array.isArray(identifying) && updating.relatedsTo[identifying]) {
+    if (operation.startsWith('RELATED') && !Array.isArray(identifying) && updating.relatedsTo[identifying]) {
       updating.relatedsTo = { ...state.relatedsTo };
       updating.relatedsTo[identifying] = { ...updating.relatedsTo[identifying] };
       updating.relatedsTo[identifying][relationshipKey] = { ...updating.relatedsTo[identifying][relationshipKey] };
 
-      if (isLoading) {
+      if (operation === 'RELATED' && isLoading) {
         updating.relatedsTo[identifying][relationshipKey].isLoading = true;
       }
 
       if (isSuccess) {
-        if (Array.isArray(content)) {
-          (updating.relatedsTo[identifying][relationshipKey] as RelatedToMany).items = content;
-        } else {
-          (updating.relatedsTo[identifying][relationshipKey] as RelatedToOne).item = content;
+        if (operation === 'RELATED_READ') {
+          if (Array.isArray(content)) {
+            (updating.relatedsTo[identifying][relationshipKey] as RelatedToMany).items = content;
+          } else {
+            (updating.relatedsTo[identifying][relationshipKey] as RelatedToOne).item = content;
+          }
+        }
+
+        if (operation === 'RELATED_UPDATED' && !Array.isArray(content)) {
+          const items = (state.relatedsTo[identifying][relationshipKey] as RelatedToMany).items;
+          (updating.relatedsTo[identifying][relationshipKey] as RelatedToMany).items = items.map(
+            it => it[idKey] === content[idKey] ? { ...it, ...content } : it,
+          );
         }
       }
 

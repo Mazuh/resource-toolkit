@@ -473,7 +473,7 @@ describe('reducer factory: delete', () => {
   });
 });
 
-describe('reducer factory: read relateds', () => {
+describe('reducer factory: relateds', () => {
   const userResource = makeReduxAssets({
     name: 'USER',
     idKey: 'id',
@@ -482,6 +482,12 @@ describe('reducer factory: read relateds', () => {
       books: MANY_RELATED,
     },
   });
+
+  const expectedSuccessMessage = {
+    causedByError: null,
+    isError: false,
+    text: 'Successful operation on related data.',
+  };
 
   it('sets initial values on relations dict for each read entity', () => {
     const expectedReadData = [
@@ -496,7 +502,7 @@ describe('reducer factory: read relateds', () => {
         lastName: 'Bandicoot',
       },
     ];
-    const expectedMessage = {
+    const expectedHosterMessage = {
       causedByError: null,
       isError: false,
       text: 'Successfully fetched data. Related to 2 items.',
@@ -514,8 +520,8 @@ describe('reducer factory: read relateds', () => {
       isReadingBlindly: false,
       isLoading: false,
       items: expectedReadData,
-      currentMessage: expectedMessage,
-      finishingLogs: [expectedMessage],
+      currentMessage: expectedHosterMessage,
+      finishingLogs: [expectedHosterMessage],
       relatedsTo: {
         42: {
           books: { items: [], isLoading: false },
@@ -531,7 +537,7 @@ describe('reducer factory: read relateds', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
-  it('handles loading action for reading', () => {
+  it('handles loading action', () => {
     const action = userResource.actions.setRelatedLoading(42, 'books');
 
     const previousState = {
@@ -573,11 +579,6 @@ describe('reducer factory: read relateds', () => {
       'stuff',
     ]);
 
-    const expectedMessage = {
-      causedByError: null,
-      isError: false,
-      text: 'Successful to read related data.',
-    };
     const previousState = {
       ...defaultState,
       relatedsTo: {
@@ -603,14 +604,65 @@ describe('reducer factory: read relateds', () => {
           address: { item: {}, isLoading: false },
         },
       },
-      currentMessage: expectedMessage,
-      finishingLogs: [expectedMessage],
+      currentMessage: expectedSuccessMessage,
+      finishingLogs: [expectedSuccessMessage],
     };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
-  it('handles error action for reading', () => {
+  it('handles success action for updating related', () => {
+    const action = userResource.actions.setRelatedUpdated(42, 'books', {
+      id: 24,
+      fully: 'updated',
+      chan: 'ged',
+    });
+
+    const previousState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: {
+            items: [
+              { id: 42, not: 'to touch, no' },
+              { id: 24, old: 'data', chan: '?' },
+            ],
+            isLoading: true,
+          },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [{ id: 24, its: 'unrelated' }], isLoading: false },
+          address: { item: { id: 24, its: 'too' }, isLoading: false },
+        },
+      },
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: {
+            items: [
+              { id: 42, not: 'to touch, no' },
+              { id: 24, old: 'data', chan: 'ged', fully: 'updated' },
+            ],
+            isLoading: false,
+          },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [{ id: 24, its: 'unrelated' }], isLoading: false },
+          address: { item: { id: 24, its: 'too' }, isLoading: false },
+        },
+      },
+      currentMessage: expectedSuccessMessage,
+      finishingLogs: [expectedSuccessMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles error action', () => {
     const error = new Error('Weird error on reading related stuff');
 
     const action = userResource.actions.setRelatedError(42, 'books', error);
@@ -618,7 +670,7 @@ describe('reducer factory: read relateds', () => {
     const expectedErrorMessage = {
       causedByError: error,
       isError: true,
-      text: 'Failed to read related data.',
+      text: 'Failed operation on related data.',
     };
     const previousState = {
       ...defaultState,
