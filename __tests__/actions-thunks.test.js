@@ -642,3 +642,75 @@ describe('action creator factory for thunks: update relateds', () => {
     done();
   });
 });
+
+describe('action creator factory for thunks: delete relateds', () => {
+  let UserBookRestfulAPI;
+  let dispatch;
+
+  beforeEach(() => {
+    UserBookRestfulAPI = {
+      delete: makeMockedFetchFn(id => ({
+        data: { id },
+      })),
+    };
+
+    dispatch = jest.fn();
+  });
+
+  it('on deleting relateds, dispatchs loading and done', async done => {
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      relatedKeys: {
+        books: 'many',
+      },
+      gateway: {
+        deleteRelated: async (userId, relationshipKey, queryset) => {
+          const response = await UserBookRestfulAPI.delete(userId, queryset.id);
+          const body = await response.json();
+          return body['data'];
+        },
+      },
+    });
+
+    const userId = 42;
+    const deletingQueryData = { id: 42 };
+    const thunk = userResource.actions.deleteRelated(userId, 'books', deletingQueryData);
+
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(
+      userResource.actions.setRelatedDeleted(42, 'books', deletingQueryData),
+    );
+    expect(dispatch).toBeCalledWith(
+      userResource.actions.setRelatedDeleted(42, 'books', deletingQueryData),
+    );
+
+    done();
+  });
+
+  it('on deleting relateds, may dispatch loading and error', async done => {
+    const error = new Error('oh no, error on fetching stuff');
+    const userResource = makeReduxAssets({
+      name: 'USER',
+      idKey: 'id',
+      relatedKeys: {
+        books: 'many',
+      },
+      gateway: {
+        deleteRelated: jest.fn(() => Promise.reject(error)),
+      },
+    });
+
+    const userId = 42;
+    const thunk = userResource.actions.deleteRelated(userId, 'books', {});
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(userResource.actions.setRelatedLoading(42, 'books'));
+    expect(dispatch).toBeCalledWith(userResource.actions.setRelatedError(42, 'books', error));
+
+    done();
+  });
+});

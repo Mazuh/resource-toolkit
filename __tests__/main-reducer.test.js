@@ -697,6 +697,52 @@ describe('reducer factory: relateds', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
+  it('handles success action for deleting related', () => {
+    const action = userResource.actions.setRelatedDeleted(42, 'books', {
+      id: 24,
+    });
+
+    const previousState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: {
+            items: [
+              { id: 42, not: 'to touch, no' },
+              { id: 24, bad: 'data' },
+            ],
+            isLoading: true,
+          },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [{ id: 24, its: 'unrelated' }], isLoading: false },
+          address: { item: { id: 24, its: 'too' }, isLoading: false },
+        },
+      },
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: {
+            items: [{ id: 42, not: 'to touch, no' }],
+            isLoading: false,
+          },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [{ id: 24, its: 'unrelated' }], isLoading: false },
+          address: { item: { id: 24, its: 'too' }, isLoading: false },
+        },
+      },
+      currentMessage: expectedSuccessMessage,
+      finishingLogs: [expectedSuccessMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
   it('handles error action', () => {
     const error = new Error('Weird error on reading related stuff');
 

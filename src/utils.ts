@@ -16,6 +16,7 @@ export function makeDefaultMessageText(relating: Entity | Entity[], operation: O
     case 'RELATED_CREATED':
     case 'RELATED_READ':
     case 'RELATED_UPDATED':
+    case 'RELATED_DELETED':
       return (isError ? 'Failed operation on related data.' : 'Successful operation on related data.');
     default:
       return isError
