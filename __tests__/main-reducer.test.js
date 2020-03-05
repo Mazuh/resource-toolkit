@@ -572,6 +572,41 @@ describe('reducer factory: relateds', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
+  it('handles success action for creating related', () => {
+    const action = userResource.actions.setRelatedCreated(42, 'books', { title: 'For Dummies' });
+
+    const previousState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: { items: [{ title: 'Head First' }], isLoading: true },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+      },
+    };
+    const expectedCurrentState = {
+      ...defaultState,
+      relatedsTo: {
+        42: {
+          books: { items: [{ title: 'Head First' }, { title: 'For Dummies' }], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+        69: {
+          books: { items: [], isLoading: false },
+          address: { item: {}, isLoading: false },
+        },
+      },
+      currentMessage: expectedSuccessMessage,
+      finishingLogs: [expectedSuccessMessage],
+    };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
   it('handles success action for reading related', () => {
     const action = userResource.actions.setRelatedRead(42, 'books', [
       'fetched',

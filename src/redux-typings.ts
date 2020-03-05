@@ -36,6 +36,7 @@ export type Operation = (
   | 'UPDATE'
   | 'DELETE'
   | 'RELATED'
+  | 'RELATED_CREATED'
   | 'RELATED_READ'
   | 'RELATED_UPDATED'
   | 'CLEAR_ITEMS'
@@ -100,6 +101,7 @@ export interface Gateway {
   readMany?: (...args: any[]) => Promise<Entity[]>;
   update?: (...args: any[]) => Promise<Entity>;
   delete?: (...args: any[]) => Promise<void>;
+  createRelated?: (...args: any[]) => Promise<Entity>;
   readRelated?: (...args: any[]) => Promise<Entity | Entity[]>;
-  updateRelated?: (...args: any[]) => Promise<Entity | Entity[]>;
+  updateRelated?: (...args: any[]) => Promise<Entity>;
 }

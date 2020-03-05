@@ -91,6 +91,13 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       step: 'SUCCESS',
       identifying,
     }),
+    setRelatedCreated: (ownerIdentifier: Identifier, relationshipKey: string, content: GatewayContent) => makeAction({
+      operation: 'RELATED_CREATED',
+      step: 'SUCCESS',
+      identifying: ownerIdentifier,
+      relationshipKey,
+      content,
+    }),
     setRelatedRead: (ownerIdentifier: Identifier, relationshipKey: string, content: GatewayContent) => makeAction({
       operation: 'RELATED_READ',
       step: 'SUCCESS',
@@ -209,6 +216,15 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       try {
         const content = await gateway.readRelated(ownerIdentifier, relationshipKey, ...args);
         dispatch(plainActions.setRelatedRead(ownerIdentifier, relationshipKey, content));
+      } catch (error) {
+        dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+      }
+    },
+    createRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+      try {
+        const content = await gateway.createRelated(ownerIdentifier, relationshipKey, ...args);
+        dispatch(plainActions.setRelatedCreated(ownerIdentifier, relationshipKey, content));
       } catch (error) {
         dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
       }
@@ -352,7 +368,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         updating.relatedsTo[identifying][relationshipKey].isLoading = true;
       }
 
-      if (isSuccess) {
+      if (isSuccess && !(content instanceof Error)) {
         if (operation === 'RELATED_READ') {
           if (Array.isArray(content)) {
             (updating.relatedsTo[identifying][relationshipKey] as RelatedToMany).items = content;
@@ -366,6 +382,14 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
           (updating.relatedsTo[identifying][relationshipKey] as RelatedToMany).items = items.map(
             it => it[idKey] === content[idKey] ? { ...it, ...content } : it,
           );
+        }
+
+        if (operation === 'RELATED_CREATED' && !Array.isArray(content)) {
+          const items = (state.relatedsTo[identifying][relationshipKey] as RelatedToMany).items;
+          (updating.relatedsTo[identifying][relationshipKey] as RelatedToMany).items = [
+            ...items,
+            content,
+          ];
         }
       }
 

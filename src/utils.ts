@@ -13,6 +13,7 @@ export function makeDefaultMessageText(relating: Entity | Entity[], operation: O
     case 'DELETE':
       return (isError ? 'Failed to delete.' : 'Successfully deleted.');
     case 'RELATED':
+    case 'RELATED_CREATED':
     case 'RELATED_READ':
     case 'RELATED_UPDATED':
       return (isError ? 'Failed operation on related data.' : 'Successful operation on related data.');
