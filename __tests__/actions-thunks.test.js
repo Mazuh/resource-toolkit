@@ -55,6 +55,16 @@ describe('action creator factory for thunks: commons', () => {
 });
 
 describe('action creator factory for thunks: create', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
   let UserRestfulAPI;
   let dispatch;
 
@@ -95,6 +105,16 @@ describe('action creator factory for thunks: create', () => {
 });
 
 describe('action creator factory for thunks: read', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
   let UserRestfulAPI;
   let dispatch;
 
@@ -286,6 +306,16 @@ describe('action creator factory for thunks: read', () => {
 });
 
 describe('action creator factory for thunks: update', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
   let UserRestfulAPI;
   let dispatch;
 
@@ -354,6 +384,16 @@ describe('action creator factory for thunks: update', () => {
 });
 
 describe('action creator factory for thunks: delete', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
   let UserRestfulAPI;
   let dispatch;
 
@@ -410,6 +450,16 @@ describe('action creator factory for thunks: delete', () => {
 });
 
 describe('action creator factory for thunks: create relateds', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
   let UserBookRestfulAPI;
   let dispatch;
 
@@ -482,6 +532,16 @@ describe('action creator factory for thunks: create relateds', () => {
 });
 
 describe('action creator factory for thunks: read relateds', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
   let UserBookRestfulAPI;
   let dispatch;
 
@@ -570,6 +630,16 @@ describe('action creator factory for thunks: read relateds', () => {
 });
 
 describe('action creator factory for thunks: update relateds', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
   let UserBookRestfulAPI;
   let dispatch;
 
@@ -644,6 +714,16 @@ describe('action creator factory for thunks: update relateds', () => {
 });
 
 describe('action creator factory for thunks: delete relateds', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
   let UserBookRestfulAPI;
   let dispatch;
 

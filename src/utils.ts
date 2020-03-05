@@ -24,3 +24,19 @@ export function makeDefaultMessageText(relating: Entity | Entity[], operation: O
         : 'Success, but with unknown and unexpected response.';
   }
 }
+
+export function minimalDelayedHOC(func: GenericFunction, threshold: number = 1000): GenericFunction {
+  const initialTime = Date.now();
+  const thresholdTime = initialTime + threshold;
+
+  return (...args: any[]): void => {
+    const pendingTime = thresholdTime - Date.now();
+    if (pendingTime > 0) {
+      global.setTimeout(() => func(...args), pendingTime);
+    } else {
+      func(...args);
+    }
+  };
+}
+
+type GenericFunction = (...args: any[]) => void;

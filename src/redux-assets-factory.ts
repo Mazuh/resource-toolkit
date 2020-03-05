@@ -13,7 +13,7 @@ import {
   RelatedToMany,
   EMPTY_INITIAL_STATE,
 } from './redux-typings';
-import { makeDefaultMessageText } from './utils';
+import { makeDefaultMessageText, minimalDelayedHOC } from './utils';
 
 export type ResourceToolParams = {
   name: string;
@@ -165,93 +165,103 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
     ...plainActions,
     create: (...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setCreating());
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.create(...args);
-        dispatch(plainActions.setCreated(content));
+        gracefullyDispatch(plainActions.setCreated(content));
       } catch (error) {
-        dispatch(plainActions.setCreateError(error));
+        gracefullyDispatch(plainActions.setCreateError(error));
       }
     },
     readOne: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading(identifying));
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.readOne(...args);
-        dispatch(plainActions.setRead(identifying, content));
+        gracefullyDispatch(plainActions.setRead(identifying, content));
       } catch (error) {
-        dispatch(plainActions.setReadError(identifying, error));
+        gracefullyDispatch(plainActions.setReadError(identifying, error));
       }
     },
     readMany: (identifying: Identifier[] = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading(identifying));
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.readMany(...args);
-        dispatch(plainActions.setRead(identifying, content));
+        gracefullyDispatch(plainActions.setRead(identifying, content));
       } catch (error) {
-        dispatch(plainActions.setReadError(identifying, error));
+        gracefullyDispatch(plainActions.setReadError(identifying, error));
       }
     },
     readAll: (...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading());
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.readMany(...args);
         dispatch(plainActions.clearItems());
-        dispatch(plainActions.setRead(null, content));
+        gracefullyDispatch(plainActions.setRead(null, content));
       } catch (error) {
-        dispatch(plainActions.setReadError(null, error));
+        gracefullyDispatch(plainActions.setReadError(null, error));
       }
     },
     update: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setUpdating(identifying));
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.update(...args);
-        dispatch(plainActions.setUpdated(identifying, content));
+        gracefullyDispatch(plainActions.setUpdated(identifying, content));
       } catch (error) {
-        dispatch(plainActions.setUpdateError(identifying, error));
+        gracefullyDispatch(plainActions.setUpdateError(identifying, error));
       }
     },
     delete: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setDeleting(identifying));
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         await gateway.delete(...args);
-        dispatch(plainActions.setDeleted(identifying));
+        gracefullyDispatch(plainActions.setDeleted(identifying));
       } catch (error) {
-        dispatch(plainActions.setDeleteError(identifying, error));
+        gracefullyDispatch(plainActions.setDeleteError(identifying, error));
       }
     },
     readRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.readRelated(ownerIdentifier, relationshipKey, ...args);
-        dispatch(plainActions.setRelatedRead(ownerIdentifier, relationshipKey, content));
+        gracefullyDispatch(plainActions.setRelatedRead(ownerIdentifier, relationshipKey, content));
       } catch (error) {
-        dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
       }
     },
     createRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.createRelated(ownerIdentifier, relationshipKey, ...args);
-        dispatch(plainActions.setRelatedCreated(ownerIdentifier, relationshipKey, content));
+        gracefullyDispatch(plainActions.setRelatedCreated(ownerIdentifier, relationshipKey, content));
       } catch (error) {
-        dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
       }
     },
     updateRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.updateRelated(ownerIdentifier, relationshipKey, ...args);
-        dispatch(plainActions.setRelatedUpdated(ownerIdentifier, relationshipKey, content));
+        gracefullyDispatch(plainActions.setRelatedUpdated(ownerIdentifier, relationshipKey, content));
       } catch (error) {
-        dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
       }
     },
     deleteRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+      const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.deleteRelated(ownerIdentifier, relationshipKey, ...args);
-        dispatch(plainActions.setRelatedDeleted(ownerIdentifier, relationshipKey, content));
+        gracefullyDispatch(plainActions.setRelatedDeleted(ownerIdentifier, relationshipKey, content));
       } catch (error) {
-        dispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
       }
     },
   };
