@@ -31,7 +31,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
     makeMessageText = makeDefaultMessageText,
   } = params;
 
-  const actionType = `RESOURCE_TOOlKIT__${name}`;
+  const actionType = `RESOURCE_TOOLKIT__${name}`;
 
   type BoundResourceActon = ResourceAction<typeof actionType>;
   const makeAction = (payload: ResourceIntent): BoundResourceActon => {

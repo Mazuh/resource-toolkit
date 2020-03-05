@@ -9,13 +9,13 @@ describe('action factory with plain actions', () => {
 
   it('has util for creating namespaced and private actions', () => {
     expect(userResource.makeAction({ my: 'payload' })).toEqual({
-      type: 'RESOURCE_TOOlKIT__USER',
+      type: 'RESOURCE_TOOLKIT__USER',
       payload: { my: 'payload' },
     });
   });
 
   it('has action type exposed', () => {
-    expect(userResource.actionType).toBe('RESOURCE_TOOlKIT__USER');
+    expect(userResource.actionType).toBe('RESOURCE_TOOLKIT__USER');
   });
 
   it('has action for clearing the current message', () => {
