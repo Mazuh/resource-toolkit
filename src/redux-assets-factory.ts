@@ -177,7 +177,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       dispatch(plainActions.setReading(identifying));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        const content = await gateway.readOne(...args);
+        const content = await gateway.fetchOne(...args);
         gracefullyDispatch(plainActions.setRead(identifying, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setReadError(identifying, error));
@@ -187,7 +187,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       dispatch(plainActions.setReading(identifying));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        const content = await gateway.readMany(...args);
+        const content = await gateway.fetchMany(...args);
         gracefullyDispatch(plainActions.setRead(identifying, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setReadError(identifying, error));
@@ -197,7 +197,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       dispatch(plainActions.setReading());
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        const content = await gateway.readMany(...args);
+        const content = await gateway.fetchMany(...args);
         dispatch(plainActions.clearItems());
         gracefullyDispatch(plainActions.setRead(null, content));
       } catch (error) {
@@ -228,7 +228,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        const content = await gateway.readRelated(ownerIdentifier, relationshipKey, ...args);
+        const content = await gateway.fetchRelated(ownerIdentifier, relationshipKey, ...args);
         gracefullyDispatch(plainActions.setRelatedRead(ownerIdentifier, relationshipKey, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));

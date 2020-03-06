@@ -18,11 +18,11 @@ describe('action creator factory for thunks: commons', () => {
       name: 'USER',
       idKey: 'id',
       gateway: {
-        readOne: gatewayFetchOne,
-        readMany: gatewayFetchMany,
+        fetchOne: gatewayFetchOne,
+        fetchMany: gatewayFetchMany,
         update: gatewayUpdate,
         delete: gatewayDelete,
-        readRelated: gatewayFetchRelated,
+        fetchRelated: gatewayFetchRelated,
       },
     });
 
@@ -153,7 +153,7 @@ describe('action creator factory for thunks: read', () => {
       name: 'USER',
       idKey: 'id',
       gateway: {
-        readMany: async () => {
+        fetchMany: async () => {
           const response = await UserRestfulAPI.fetchMany();
           const body = await response.json();
           return body['data'];
@@ -189,7 +189,7 @@ describe('action creator factory for thunks: read', () => {
       name: 'USER',
       idKey: 'id',
       gateway: {
-        readMany: () => Promise.reject(error),
+        fetchMany: () => Promise.reject(error),
       },
     });
     const thunk = userResource.actions.readMany();
@@ -207,7 +207,7 @@ describe('action creator factory for thunks: read', () => {
       name: 'USER',
       idKey: 'id',
       gateway: {
-        readMany: async () => {
+        fetchMany: async () => {
           const response = await UserRestfulAPI.fetchMany();
           const body = await response.json();
           return body['data'];
@@ -244,7 +244,7 @@ describe('action creator factory for thunks: read', () => {
       name: 'USER',
       idKey: 'id',
       gateway: {
-        readMany: () => Promise.reject(error),
+        fetchMany: () => Promise.reject(error),
       },
     });
     const thunk = userResource.actions.readAll();
@@ -262,7 +262,7 @@ describe('action creator factory for thunks: read', () => {
       name: 'USER',
       idKey: 'id',
       gateway: {
-        readOne: async queryset => {
+        fetchOne: async queryset => {
           const response = await UserRestfulAPI.fetchOne(queryset.id);
           const body = await response.json();
           return body['data'];
@@ -291,7 +291,7 @@ describe('action creator factory for thunks: read', () => {
       name: 'USER',
       idKey: 'id',
       gateway: {
-        readOne: () => Promise.reject(error),
+        fetchOne: () => Promise.reject(error),
       },
     });
     const thunk = userResource.actions.readOne(69);
@@ -572,7 +572,7 @@ describe('action creator factory for thunks: read relateds', () => {
         books: 'many',
       },
       gateway: {
-        readRelated: async (userId, relationshipKey, queryset) => {
+        fetchRelated: async (userId, relationshipKey, queryset) => {
           const response = await UserBookRestfulAPI.fetchMany(userId, queryset);
           const body = await response.json();
           return body['data'];
@@ -613,7 +613,7 @@ describe('action creator factory for thunks: read relateds', () => {
         books: 'many',
       },
       gateway: {
-        readRelated: jest.fn(() => Promise.reject(error)),
+        fetchRelated: jest.fn(() => Promise.reject(error)),
       },
     });
 
