@@ -25,6 +25,31 @@ export function makeDefaultMessageText(relating: Entity | Entity[], operation: O
   }
 }
 
+export function blockNonIdentifying(identifying: any) {
+  if (!Array.isArray(identifying)) {
+    blockNonIdentifier(identifying);
+    return;
+  }
+
+  if (identifying.length === 0) {
+    throw new Error('Expected ids with string or numbers, but got the array empty.');
+  }
+
+  identifying.forEach((identifier: any) => {
+    const idType = typeof identifier;
+    if (!validIdentifierTypes.includes(idType)) {
+      throw new Error(`Expected ids as strings or numbers, but got an array with ${idType}.`);
+    }
+  });
+}
+
+export function blockNonIdentifier(identifier: any) {
+  const idType = typeof identifier;
+  if (!validIdentifierTypes.includes(idType)) {
+    throw new Error(`Expected unique id to be string or number, but got ${idType}.`);
+  }
+}
+
 export function minimalDelayedHOC(func: GenericFunction, threshold: number = 1000): GenericFunction {
   const initialTime = Date.now();
   const thresholdTime = initialTime + threshold;
@@ -40,3 +65,5 @@ export function minimalDelayedHOC(func: GenericFunction, threshold: number = 100
 }
 
 type GenericFunction = (...args: any[]) => void;
+
+const validIdentifierTypes = ['string', 'number'];

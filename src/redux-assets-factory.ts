@@ -13,7 +13,12 @@ import {
   RelatedToMany,
   EMPTY_INITIAL_STATE,
 } from './redux-typings';
-import { makeDefaultMessageText, minimalDelayedHOC } from './utils';
+import {
+  makeDefaultMessageText,
+  blockNonIdentifying,
+  blockNonIdentifier,
+  minimalDelayedHOC,
+} from '../src/utils';
 
 export type ResourceToolParams = {
   name: string;
@@ -173,17 +178,23 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setCreateError(error));
       }
     },
-    readOne: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
-      dispatch(plainActions.setReading(identifying));
+    readOne: (identifier: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      blockNonIdentifier(identifier);
+
+      dispatch(plainActions.setReading(identifier));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.fetchOne(...args);
-        gracefullyDispatch(plainActions.setRead(identifying, content));
+        gracefullyDispatch(plainActions.setRead(identifier, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setReadError(identifying, error));
+        gracefullyDispatch(plainActions.setReadError(identifier, error));
       }
     },
     readMany: (identifying: Identifier[] = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      if (identifying !== null) {
+        blockNonIdentifying(identifying);
+      }
+
       dispatch(plainActions.setReading(identifying));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
@@ -204,27 +215,33 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setReadError(null, error));
       }
     },
-    update: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
-      dispatch(plainActions.setUpdating(identifying));
+    update: (identifier: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      blockNonIdentifier(identifier);
+
+      dispatch(plainActions.setUpdating(identifier));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.update(...args);
-        gracefullyDispatch(plainActions.setUpdated(identifying, content));
+        gracefullyDispatch(plainActions.setUpdated(identifier, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setUpdateError(identifying, error));
+        gracefullyDispatch(plainActions.setUpdateError(identifier, error));
       }
     },
-    delete: (identifying: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
-      dispatch(plainActions.setDeleting(identifying));
+    delete: (identifier: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      blockNonIdentifier(identifier);
+
+      dispatch(plainActions.setDeleting(identifier));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         await gateway.delete(...args);
-        gracefullyDispatch(plainActions.setDeleted(identifying));
+        gracefullyDispatch(plainActions.setDeleted(identifier));
       } catch (error) {
-        gracefullyDispatch(plainActions.setDeleteError(identifying, error));
+        gracefullyDispatch(plainActions.setDeleteError(identifier, error));
       }
     },
     readRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      blockNonIdentifier(ownerIdentifier);
+
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
@@ -235,6 +252,8 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
     },
     createRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      blockNonIdentifier(ownerIdentifier);
+
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
@@ -245,6 +264,8 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
     },
     updateRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      blockNonIdentifier(ownerIdentifier);
+
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
@@ -255,6 +276,8 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       }
     },
     deleteRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      blockNonIdentifier(ownerIdentifier);
+
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {

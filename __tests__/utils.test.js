@@ -1,4 +1,9 @@
-import { makeDefaultMessageText, minimalDelayedHOC } from '../src/utils';
+import {
+  makeDefaultMessageText,
+  blockNonIdentifying,
+  blockNonIdentifier,
+  minimalDelayedHOC,
+} from '../src/utils';
 
 describe('makeDefaultMessageText', () => {
   it('is reliable for random stuff passed by', () => {
@@ -10,6 +15,74 @@ describe('makeDefaultMessageText', () => {
     const isError = true;
     const text = makeDefaultMessageText('oeoe', 123, isError);
     expect(text).toBe('Unknown and unexpected error response.');
+  });
+});
+
+describe('blockNonIdentifying', () => {
+  it('throws error if the expression is not a string or a number', () => {
+    expect(() => blockNonIdentifying()).toThrow(
+      'Expected unique id to be string or number, but got undefined.',
+    );
+    expect(() => blockNonIdentifying({})).toThrow(
+      'Expected unique id to be string or number, but got object.',
+    );
+    expect(() => blockNonIdentifying(null)).toThrow(
+      'Expected unique id to be string or number, but got object.',
+    );
+  });
+
+  it('throws error if the expression is array including non string nor number value', () => {
+    expect(() => blockNonIdentifying([123, {}])).toThrow(
+      'Expected ids as strings or numbers, but got an array with object',
+    );
+    expect(() => blockNonIdentifying(['123', {}])).toThrow(
+      'Expected ids as strings or numbers, but got an array with object',
+    );
+    expect(() => blockNonIdentifying([{}])).toThrow(
+      'Expected ids as strings or numbers, but got an array with object',
+    );
+    expect(() => blockNonIdentifying([[]])).toThrow(
+      'Expected ids as strings or numbers, but got an array with object',
+    );
+  });
+
+  it('throws error if the expression is a empty array', () => {
+    expect(() => blockNonIdentifying([])).toThrow(
+      'Expected ids with string or numbers, but got the array empty.',
+    );
+  });
+
+  it('not throw error if the expression is a string or a number', () => {
+    expect(() => blockNonIdentifying(123)).not.toThrow();
+    expect(() => blockNonIdentifying('123')).not.toThrow();
+  });
+
+  it('not throw error if the expression is array including only string or number values', () => {
+    expect(() => blockNonIdentifying([123, 321])).not.toThrow();
+    expect(() => blockNonIdentifying(['123', '321'])).not.toThrow();
+    expect(() => blockNonIdentifying(['123', 321])).not.toThrow();
+  });
+});
+
+describe('blockNonIdentifier', () => {
+  it('throws error if the expression is not a string or a number', () => {
+    expect(() => blockNonIdentifier()).toThrow(
+      'Expected unique id to be string or number, but got undefined.',
+    );
+    expect(() => blockNonIdentifier({})).toThrow(
+      'Expected unique id to be string or number, but got object.',
+    );
+    expect(() => blockNonIdentifier(null)).toThrow(
+      'Expected unique id to be string or number, but got object.',
+    );
+    expect(() => blockNonIdentifier([])).toThrow(
+      'Expected unique id to be string or number, but got object.',
+    );
+  });
+
+  it('not throw error if the expression is a string or a number', () => {
+    expect(() => blockNonIdentifier(123)).not.toThrow();
+    expect(() => blockNonIdentifier('123')).not.toThrow();
   });
 });
 

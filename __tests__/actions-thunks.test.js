@@ -15,7 +15,7 @@ describe('action creator factory for thunks: commons', () => {
     const gatewayDelete = jest.fn(() => Promise.resolve({}));
     const gatewayFetchRelated = jest.fn(() => Promise.resolve([]));
     const userResource = makeReduxAssets({
-      name: 'USER',
+      name: 'MOCK',
       idKey: 'id',
       gateway: {
         fetchOne: gatewayFetchOne,
@@ -26,11 +26,13 @@ describe('action creator factory for thunks: commons', () => {
       },
     });
 
-    await userResource.actions.readOne(null, { my: 'args' }, 'one', 123)(dispatch);
+    const mockId = 22;
+
+    await userResource.actions.readOne(mockId, { my: 'args' }, 'one', 123)(dispatch);
     expect(gatewayFetchOne).toBeCalledWith({ my: 'args' }, 'one', 123);
     gatewayFetchOne.mockClear();
 
-    await userResource.actions.readMany(null, { my: 'args' }, 'many', 123)(dispatch);
+    await userResource.actions.readMany([mockId], { my: 'args' }, 'many', 123)(dispatch);
     expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayFetchMany.mockClear();
 
@@ -38,16 +40,16 @@ describe('action creator factory for thunks: commons', () => {
     expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayFetchMany.mockClear();
 
-    await userResource.actions.update(1, { my: 'args' }, 'many', 123)(dispatch);
+    await userResource.actions.update(mockId, { my: 'args' }, 'many', 123)(dispatch);
     expect(gatewayUpdate).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayUpdate.mockClear();
 
-    await userResource.actions.delete(1, { my: 'args' }, 'many', 123)(dispatch);
+    await userResource.actions.delete(mockId, { my: 'args' }, 'many', 123)(dispatch);
     expect(gatewayDelete).toBeCalledWith({ my: 'args' }, 'many', 123);
     gatewayDelete.mockClear();
 
-    await userResource.actions.readRelated(1, '?', { my: 'args' }, 'many', 123)(dispatch);
-    expect(gatewayFetchRelated).toBeCalledWith(1, '?', { my: 'args' }, 'many', 123);
+    await userResource.actions.readRelated(mockId, '?', { my: 'args' }, 'many', 123)(dispatch);
+    expect(gatewayFetchRelated).toBeCalledWith(mockId, '?', { my: 'args' }, 'many', 123);
     gatewayFetchRelated.mockClear();
 
     done();
