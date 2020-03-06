@@ -323,24 +323,27 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
         updating.items = [...state.items, ...items];
 
-        items.forEach((item: Entity) => {
-          const id = item[idKey];
-          updating.relatedsTo[id] = Object.keys(relatedKeys).reduce((acc, key) => {
-            const valueType = relatedKeys[key];
-            if (valueType === 'one') {
-              acc[key] = {
-                item: {},
-                isLoading: false,
-              } as RelatedToOne;
-            } else if (valueType === 'many') {
-              acc[key] = {
-                items: [],
-                isLoading: false,
-              } as RelatedToMany;
-            }
-            return acc;
-          }, {});
-        });
+        const relatedValuesKeys = Object.keys(relatedKeys);
+        if (relatedValuesKeys.length > 0) {
+          items.forEach((item: Entity) => {
+            const id = item[idKey];
+            updating.relatedsTo[id] = relatedValuesKeys.reduce((acc, key) => {
+              const valueType = relatedKeys[key];
+              if (valueType === 'one') {
+                acc[key] = {
+                  item: {},
+                  isLoading: false,
+                } as RelatedToOne;
+              } else if (valueType === 'many') {
+                acc[key] = {
+                  items: [],
+                  isLoading: false,
+                } as RelatedToMany;
+              }
+              return acc;
+            }, {});
+          });
+        }
       }
 
       if (isFinished) {
