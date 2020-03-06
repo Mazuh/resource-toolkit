@@ -15,7 +15,16 @@
 
 ## About
 
-TODO
+Often we consume RESTful APIs using reactive UIs with React, and there are a few state scenarios always present:
+- Loading:
+  - Is the loading a creation request and you want to disable or hide the creation form buttons?
+  - Is the loading a reading operation and only a blinking skeleton is supposed to fill that table?
+  - Or maybe you're updating a single row and you only want to disable that specific row action buttons with a cute spinning instead of disabling that creation form?
+  - And if
+- No data found
+- Stacking error messages
+
+While this is not a UI lib, it's a state helper to handle all of these state changes above.
 
 ## Install
 
@@ -23,103 +32,14 @@ TODO
 npm install --save resource-toolkit
 ```
 
+## Example
+
+Below there are a dumb usage example, but you may alreadt see a running To Do List application here:
+https://github.com/Mazuh/octo-todo
+
 ## Usage
 
 TODO
-
-## Example
-
-The snippet below is an example of integration with [Redux](https://redux.js.org/)
-using [Ducks pattern](https://redux.js.org/style-guide/style-guide/#structure-files-as-feature-folders-or-ducks)
-to create a simple state manager.
-
-```js
-import { makeReduxAssets } from 'resource-toolkit';
-
-export const userResource = makeReduxAssets({
-  name: 'USER',
-  idKey: 'id', // what property will serve to uniquelly identify each resource object?
-  gateway: {
-    readMany: async (queryset) => {
-      // example with a restful API client, but...
-      // it can be any fetching (maybe querying from local storage?)
-      const response = await UserAPI.get(queryset);
-      const body = await response.json();
-      // my array of data may be nested in JSON body, or have another weird
-      // business logic after response so I have my change to implement it here.
-      return body.items;
-    },
-  },
-});
-
-export const initialState = {
-  ...userResource.initialState,
-  // (maybe I want to insert more fields here...)
-};
-
-const actions = {
-  ...userResource.actions,
-  // (any other action creator functions I may want...)
-};
-
-// cute naming, it'll be useful to mapDispatchToProps
-// if I'm using it with React
-export const userActions = actions;
-
-export default function reducer(state = initialState, action) {
-  switch (action.type) {
-    case userResource.actionType:
-      return userResource.reducer(state, action);
-    // (any other own custom handlers here, if they exist...)
-    default:
-      return state;
-  }
-}
-```
-
-Below, the same state slice, but it's a snippet in case you don't want custom actions nor
-reducers for your regular CRUD:
-
-```js
-import { makeReduxAssets } from 'resource-toolkit';
-
-export const userResource = makeReduxAssets({
-  name: 'USER',
-  idKey: 'id',
-  gateway: {
-    readMany: async (queryset) => {
-      // it's still up to you here
-      const response = await UserAPI.get(queryset);
-      const body = await response.json();
-      return body.items;
-    },
-  },
-});
-
-export const initialState = userResource.initialState;
-
-const actions = userResource.actions;
-export const userActions = actions;
-
-export userResource.reducer;
-```
-
-An example of state content, all fully handled by the `reducer` and its thunks without your interference
-besides implementing the gateway layer:
-
-```js
-{
-  items: [], // it'll store the objects retrieved and parsed by your gateway functions
-  isCreating: false, // bool if a creation thunk is pending
-  isReadingBlindly: false, // bool if a reading thunk is pending but the client is unaware of its ids
-  reading: [], // if reading thunk already knows the ids of what is being retrieved, it'll be stored here
-  updating: [], // to store ids of what entities are being currently updated
-  deleting: [], // to store ids of what entities are being currently deleted
-  isLoading: false, // generic flag that is true if any of the loading utils above is filled
-  finishingLogs: [], // to store all logs (you can leave the default parser or implement it you by yourself)
-  currentMessage: null, // last log (if it's an error, it may include the original exception for debugging)
-}
-```
 
 ## Contributing
 
