@@ -49,7 +49,7 @@ describe('action creator factory for thunks: commons', () => {
     gatewayFetchMany.mockClear();
 
     await userResource.actions.readAll({ my: 'args' }, 'many', 123)(dispatch);
-    expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
+    expect(gatewayFetchMany).toBeCalledWith(null, { my: 'args' }, 'many', 123);
     gatewayFetchMany.mockClear();
 
     await userResource.actions.update(mockId, { my: 'args' }, 'many', 123)(dispatch);

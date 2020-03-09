@@ -211,7 +211,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        const content = await gateway.fetchMany(...args);
+        const content = await gateway.fetchMany(null, ...args);
         dispatch(plainActions.clearItems());
         gracefullyDispatch(plainActions.setRead(null, content));
       } catch (error) {
