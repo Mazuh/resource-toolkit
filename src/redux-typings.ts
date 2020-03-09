@@ -98,10 +98,10 @@ export const EMPTY_INITIAL_STATE: ResourceState = Object.freeze({
 
 export interface Gateway {
   create?: (...args: any[]) => Promise<Entity | Entity[]>;
-  fetchOne?: (...args: any[]) => Promise<Entity>;
-  fetchMany?: (...args: any[]) => Promise<Entity[]>;
-  update?: (...args: any[]) => Promise<Entity>;
-  delete?: (...args: any[]) => Promise<void>;
+  fetchOne?: (identifier: Identifier, ...args: any[]) => Promise<Entity>;
+  fetchMany?: (identifiers?: Identifier[], ...args: any[]) => Promise<Entity[]>;
+  update?: (identifier: Identifier, ...args: any[]) => Promise<Entity>;
+  delete?: (identifier: Identifier, ...args: any[]) => Promise<Entity | void>;
   createRelated?: (...args: any[]) => Promise<Entity>;
   fetchRelated?: (...args: any[]) => Promise<Entity | Entity[]>;
   updateRelated?: (...args: any[]) => Promise<Entity>;

@@ -182,30 +182,33 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       blockNonIdentifier(identifier);
 
       dispatch(plainActions.setReading(identifier));
+
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        const content = await gateway.fetchOne(...args);
+        const content = await gateway.fetchOne(identifier, ...args);
         gracefullyDispatch(plainActions.setRead(identifier, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setReadError(identifier, error));
       }
     },
-    readMany: (identifying: Identifier[] = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
-      if (identifying !== null) {
-        blockNonIdentifying(identifying);
+    readMany: (identifers: Identifier[] = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
+      if (identifers !== null) {
+        blockNonIdentifying(identifers);
       }
 
-      dispatch(plainActions.setReading(identifying));
+      dispatch(plainActions.setReading(identifers));
+
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        const content = await gateway.fetchMany(...args);
-        gracefullyDispatch(plainActions.setRead(identifying, content));
+        const content = await gateway.fetchMany(identifers, ...args);
+        gracefullyDispatch(plainActions.setRead(identifers, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setReadError(identifying, error));
+        gracefullyDispatch(plainActions.setReadError(identifers, error));
       }
     },
     readAll: (...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading());
+
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.fetchMany(...args);
@@ -219,9 +222,10 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       blockNonIdentifier(identifier);
 
       dispatch(plainActions.setUpdating(identifier));
+
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        const content = await gateway.update(...args);
+        const content = await gateway.update(identifier, ...args);
         gracefullyDispatch(plainActions.setUpdated(identifier, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setUpdateError(identifier, error));
@@ -231,9 +235,10 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       blockNonIdentifier(identifier);
 
       dispatch(plainActions.setDeleting(identifier));
+
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        await gateway.delete(...args);
+        await gateway.delete(identifier, ...args);
         gracefullyDispatch(plainActions.setDeleted(identifier));
       } catch (error) {
         gracefullyDispatch(plainActions.setDeleteError(identifier, error));
@@ -255,6 +260,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       blockNonIdentifier(ownerIdentifier);
 
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.createRelated(ownerIdentifier, relationshipKey, ...args);
@@ -267,6 +273,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       blockNonIdentifier(ownerIdentifier);
 
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.updateRelated(ownerIdentifier, relationshipKey, ...args);
@@ -279,6 +286,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       blockNonIdentifier(ownerIdentifier);
 
       dispatch(plainActions.setRelatedLoading(ownerIdentifier, relationshipKey));
+
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.deleteRelated(ownerIdentifier, relationshipKey, ...args);

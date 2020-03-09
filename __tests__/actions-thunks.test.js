@@ -9,31 +9,43 @@ describe('action creator factory for thunks: commons', () => {
   });
 
   it('any thunk action creator must pass all its args thru its gateway', async done => {
-    const gatewayFetchOne = jest.fn(() => Promise.resolve({}));
-    const gatewayFetchMany = jest.fn(() => Promise.resolve([]));
-    const gatewayUpdate = jest.fn(() => Promise.resolve({}));
-    const gatewayDelete = jest.fn(() => Promise.resolve({}));
-    const gatewayFetchRelated = jest.fn(() => Promise.resolve([]));
+    const gatewayCreate = jest.fn(() => Promise.resolve());
+    const gatewayFetchOne = jest.fn(() => Promise.resolve());
+    const gatewayFetchMany = jest.fn(() => Promise.resolve());
+    const gatewayUpdate = jest.fn(() => Promise.resolve());
+    const gatewayDelete = jest.fn(() => Promise.resolve());
+    const gatewayCreateRelated = jest.fn(() => Promise.resolve());
+    const gatewayFetchRelated = jest.fn(() => Promise.resolve());
+    const gatewayUpdateRelated = jest.fn(() => Promise.resolve());
+    const gatewayDeleteRelated = jest.fn(() => Promise.resolve());
     const userResource = makeReduxAssets({
       name: 'MOCK',
       idKey: 'id',
       gateway: {
+        create: gatewayCreate,
         fetchOne: gatewayFetchOne,
         fetchMany: gatewayFetchMany,
         update: gatewayUpdate,
         delete: gatewayDelete,
+        createRelated: gatewayCreateRelated,
         fetchRelated: gatewayFetchRelated,
+        updateRelated: gatewayUpdateRelated,
+        deleteRelated: gatewayDeleteRelated,
       },
     });
 
     const mockId = 22;
 
+    await userResource.actions.create({ my: 'args' }, 'one', 123)(dispatch);
+    expect(gatewayCreate).toBeCalledWith({ my: 'args' }, 'one', 123);
+    gatewayCreate.mockClear();
+
     await userResource.actions.readOne(mockId, { my: 'args' }, 'one', 123)(dispatch);
-    expect(gatewayFetchOne).toBeCalledWith({ my: 'args' }, 'one', 123);
+    expect(gatewayFetchOne).toBeCalledWith(mockId, { my: 'args' }, 'one', 123);
     gatewayFetchOne.mockClear();
 
     await userResource.actions.readMany([mockId], { my: 'args' }, 'many', 123)(dispatch);
-    expect(gatewayFetchMany).toBeCalledWith({ my: 'args' }, 'many', 123);
+    expect(gatewayFetchMany).toBeCalledWith([mockId], { my: 'args' }, 'many', 123);
     gatewayFetchMany.mockClear();
 
     await userResource.actions.readAll({ my: 'args' }, 'many', 123)(dispatch);
@@ -41,16 +53,86 @@ describe('action creator factory for thunks: commons', () => {
     gatewayFetchMany.mockClear();
 
     await userResource.actions.update(mockId, { my: 'args' }, 'many', 123)(dispatch);
-    expect(gatewayUpdate).toBeCalledWith({ my: 'args' }, 'many', 123);
+    expect(gatewayUpdate).toBeCalledWith(mockId, { my: 'args' }, 'many', 123);
     gatewayUpdate.mockClear();
 
     await userResource.actions.delete(mockId, { my: 'args' }, 'many', 123)(dispatch);
-    expect(gatewayDelete).toBeCalledWith({ my: 'args' }, 'many', 123);
+    expect(gatewayDelete).toBeCalledWith(mockId, { my: 'args' }, 'many', 123);
     gatewayDelete.mockClear();
 
-    await userResource.actions.readRelated(mockId, '?', { my: 'args' }, 'many', 123)(dispatch);
-    expect(gatewayFetchRelated).toBeCalledWith(mockId, '?', { my: 'args' }, 'many', 123);
+    const relatedKey = 'books';
+
+    await userResource.actions.createRelated(
+      mockId,
+      relatedKey,
+      '?',
+      { my: 'args' },
+      'many',
+      123,
+    )(dispatch);
+    expect(gatewayCreateRelated).toBeCalledWith(
+      mockId,
+      relatedKey,
+      '?',
+      { my: 'args' },
+      'many',
+      123,
+    );
+    gatewayCreateRelated.mockClear();
+
+    await userResource.actions.readRelated(
+      mockId,
+      relatedKey,
+      '?',
+      { my: 'args' },
+      'many',
+      123,
+    )(dispatch);
+    expect(gatewayFetchRelated).toBeCalledWith(
+      mockId,
+      relatedKey,
+      '?',
+      { my: 'args' },
+      'many',
+      123,
+    );
     gatewayFetchRelated.mockClear();
+
+    await userResource.actions.updateRelated(
+      mockId,
+      relatedKey,
+      '?',
+      { my: 'args' },
+      'many',
+      123,
+    )(dispatch);
+    expect(gatewayUpdateRelated).toBeCalledWith(
+      mockId,
+      relatedKey,
+      '?',
+      { my: 'args' },
+      'many',
+      123,
+    );
+    gatewayUpdateRelated.mockClear();
+
+    await userResource.actions.deleteRelated(
+      mockId,
+      relatedKey,
+      '?',
+      { my: 'args' },
+      'many',
+      123,
+    )(dispatch);
+    expect(gatewayDeleteRelated).toBeCalledWith(
+      mockId,
+      relatedKey,
+      '?',
+      { my: 'args' },
+      'many',
+      123,
+    );
+    gatewayDeleteRelated.mockClear();
 
     done();
   });
@@ -264,8 +346,8 @@ describe('action creator factory for thunks: read', () => {
       name: 'USER',
       idKey: 'id',
       gateway: {
-        fetchOne: async queryset => {
-          const response = await UserRestfulAPI.fetchOne(queryset.id);
+        fetchOne: async (id, queryset) => {
+          const response = await UserRestfulAPI.fetchOne(id, queryset);
           const body = await response.json();
           return body['data'];
         },
@@ -336,8 +418,8 @@ describe('action creator factory for thunks: update', () => {
       name: 'USER',
       idKey: 'id',
       gateway: {
-        update: async updating => {
-          const response = await UserRestfulAPI.fetchUpdate(updating.id, updating);
+        update: async (id, updating) => {
+          const response = await UserRestfulAPI.fetchUpdate(id, updating);
           const body = await response.json();
           return body['data'];
         },
