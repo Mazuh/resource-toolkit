@@ -61,7 +61,7 @@ https://github.com/Mazuh/octo-todo (**warning**: it is currently using an old ve
 
 Here are a few dumb examples in React.
 
-### Full example for fetching all
+### Simple example for fetching all
 
 ```js
 import React from "react";
@@ -88,8 +88,8 @@ export default function App() {
     usersResource.actions.readAll()(dispatch);
   }, [dispatch]);
 
-  if (users.isReadingBlindly) {
-    return <p>Fetching all...</p>;
+  if (users.isLoading) {
+    return <p>Doing something...</p>;
   }
 
   if (users.items.length === 0) {
@@ -107,6 +107,13 @@ export default function App() {
   );
 }
 ```
+
+### More complete usage demonstration
+
+Check it out on CodeSandbox:
+https://codesandbox.io/s/resource-toolkit-usage-7h9td?fontsize=14&hidenavigation=1&theme=dark
+
+Feel free to fork it and test the features by yourself.
 
 ## Contributing
 
