@@ -53,13 +53,60 @@ npm install --save resource-toolkit
 
 ## Example
 
-On the next topic there is a dumb usage example. But you may already see a running To Do List application
+You may already see a running To Do List application
 here, crafted for didactic reasons with a friend:
-https://github.com/Mazuh/octo-todo
+https://github.com/Mazuh/octo-todo (**warning**: it is currently using an old version unstable version)
 
 ## Usage
 
-TODO
+Here are a few dumb examples in React.
+
+### Full example for fetching all
+
+```js
+import React from "react";
+import { makeReduxAssets } from 'resource-toolkit';
+
+const usersResource = makeReduxAssets({
+  name: 'user',
+  idKey: 'userId',
+  gateway: {
+    fetchMany: async (ids = null, ...args) => {
+      return [
+        { userId: 42, name: 'Marcell' },
+        { userId: 11, name: 'David' },
+        { userId: 22, name: 'Rodrigo' },
+      ];
+    },
+  },
+});
+
+export default function App() {
+  const [users, dispatch] = React.useReducer(usersResource.reducer, usersResource.initialState);
+
+  React.useEffect(() => {
+    usersResource.actions.readAll()(dispatch);
+  }, [dispatch]);
+
+  if (users.isReadingBlindly) {
+    return <p>Fetching all...</p>;
+  }
+
+  if (users.items.length === 0) {
+    return <p>No users found.</p>;
+  }
+
+  return (
+    <div>
+      <ul>
+        {users.items.map(user => (
+          <li key={user.userId}>{user.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
 
 ## Contributing
 
