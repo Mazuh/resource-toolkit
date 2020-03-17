@@ -31,7 +31,7 @@ export type ResourceToolParams = {
   expectAllMeta?: boolean,
   makeMessageText?: (relating: Entity | Entity[], operation: Operation, isError: boolean) => string;
 };
-export default function makeReduxAssets(params: ResourceToolParams): any {
+export default function makeReducerAssets(params: ResourceToolParams): any {
   const {
     name,
     idKey,

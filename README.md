@@ -65,9 +65,9 @@ Here are a few dumb examples in React.
 
 ```js
 import React from "react";
-import { makeReduxAssets } from 'resource-toolkit';
+import { makeReducerAssets } from 'resource-toolkit';
 
-const usersResource = makeReduxAssets({
+const usersResource = makeReducerAssets({
   name: 'user',
   idKey: 'userId',
   gateway: {

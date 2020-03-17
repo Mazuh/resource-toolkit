@@ -1,10 +1,10 @@
-import { makeReduxAssets } from '../src';
+import { makeReducerAssets } from '../src';
 
 describe('action factory with plain actions', () => {
   let userResource;
 
   beforeAll(() => {
-    userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+    userResource = makeReducerAssets({ name: 'USER', idKey: 'id' });
   });
 
   it('has util for creating namespaced and private actions', () => {

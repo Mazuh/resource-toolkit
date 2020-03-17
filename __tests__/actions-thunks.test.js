@@ -1,4 +1,4 @@
-import { makeReduxAssets } from '../src';
+import { makeReducerAssets } from '../src';
 import { makeMockedFetchFn, defaultEmptyMeta, defaultPaginatedMeta } from './mock-utils';
 
 describe('action creator factory for thunks: commons', () => {
@@ -18,7 +18,7 @@ describe('action creator factory for thunks: commons', () => {
     const gatewayFetchRelated = jest.fn(() => Promise.resolve());
     const gatewayUpdateRelated = jest.fn(() => Promise.resolve());
     const gatewayDeleteRelated = jest.fn(() => Promise.resolve());
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'MOCK',
       idKey: 'id',
       gateway: {
@@ -163,7 +163,7 @@ describe('action creator factory for thunks: create', () => {
   });
 
   it('on creating, dispatchs loading and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -233,7 +233,7 @@ describe('action creator factory for thunks: read', () => {
   });
 
   it('on reading many blindly, dispatchs loading and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -269,7 +269,7 @@ describe('action creator factory for thunks: read', () => {
 
   it('on reading many blindly, dispatchs loading and error', async done => {
     const error = new Error('Programming error');
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -287,7 +287,7 @@ describe('action creator factory for thunks: read', () => {
   });
 
   it('on reading all, dispatchs loading, clear and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -324,7 +324,7 @@ describe('action creator factory for thunks: read', () => {
 
   it('on reading all, dispatchs loading and error', async done => {
     const error = new Error('Programming error');
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -342,7 +342,7 @@ describe('action creator factory for thunks: read', () => {
   });
 
   it('on reading one, dispatchs loading and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -371,7 +371,7 @@ describe('action creator factory for thunks: read', () => {
 
   it('on reading one, dispatchs loading and error', async done => {
     const error = new Error('Programming error');
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -414,7 +414,7 @@ describe('action creator factory for thunks: update', () => {
   });
 
   it('on updating, dispatchs loading, clear and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -443,7 +443,7 @@ describe('action creator factory for thunks: update', () => {
 
   it('on updating, dispatchs loading and error', async done => {
     const error = new Error('Programming error');
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -492,7 +492,7 @@ describe('action creator factory for thunks: delete', () => {
   });
 
   it('on deleting one, dispatchs loading and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -514,7 +514,7 @@ describe('action creator factory for thunks: delete', () => {
 
   it('on deleting, dispatchs loading and error', async done => {
     const error = new Error('Programming error');
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       gateway: {
@@ -551,7 +551,7 @@ describe('action creator factory for thunks: reading all including meta', () => 
   });
 
   it('gateway must retrieve object with data and meta, dispatching storage for both', async () => {
-    const sampleResource = makeReduxAssets({
+    const sampleResource = makeReducerAssets({
       name: 'sample',
       idKey: 'id',
       expectAllMeta: true,
@@ -595,7 +595,7 @@ describe('action creator factory for thunks: reading all including meta', () => 
   });
 
   it('throws error if gateway cant retrieve object with data and meta, dispatching error', async () => {
-    const sampleResource = makeReduxAssets({
+    const sampleResource = makeReducerAssets({
       name: 'sample',
       idKey: 'id',
       expectAllMeta: true,
@@ -622,7 +622,7 @@ describe('action creator factory for thunks: reading all including meta', () => 
   });
 
   it('throws error if gateway returns payload with missing data, dispatching error', async () => {
-    const sampleResource = makeReduxAssets({
+    const sampleResource = makeReducerAssets({
       name: 'sample',
       idKey: 'id',
       expectAllMeta: true,
@@ -648,7 +648,7 @@ describe('action creator factory for thunks: reading all including meta', () => 
   });
 
   it('throws error if gateway returns payload with missing meta, dispatching error', async () => {
-    const sampleResource = makeReduxAssets({
+    const sampleResource = makeReducerAssets({
       name: 'sample',
       idKey: 'id',
       expectAllMeta: true,
@@ -697,7 +697,7 @@ describe('action creator factory for thunks: create relateds', () => {
   });
 
   it('on creating relateds, dispatchs loading and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       relatedKeys: {
@@ -731,7 +731,7 @@ describe('action creator factory for thunks: create relateds', () => {
 
   it('on reading relateds, may dispatch loading and error', async done => {
     const error = new Error('oh no, error on fetching stuff');
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       relatedKeys: {
@@ -788,7 +788,7 @@ describe('action creator factory for thunks: read relateds', () => {
   });
 
   it('on reading relateds, dispatchs loading and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       relatedKeys: {
@@ -829,7 +829,7 @@ describe('action creator factory for thunks: read relateds', () => {
 
   it('on reading relateds, may dispatch loading and error', async done => {
     const error = new Error('oh no, error on fetching stuff');
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       relatedKeys: {
@@ -877,7 +877,7 @@ describe('action creator factory for thunks: update relateds', () => {
   });
 
   it('on updating relateds, dispatchs loading and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       relatedKeys: {
@@ -913,7 +913,7 @@ describe('action creator factory for thunks: update relateds', () => {
 
   it('on updating relateds, may dispatch loading and error', async done => {
     const error = new Error('oh no, error on fetching stuff');
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       relatedKeys: {
@@ -961,7 +961,7 @@ describe('action creator factory for thunks: delete relateds', () => {
   });
 
   it('on deleting relateds, dispatchs loading and done', async done => {
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       relatedKeys: {
@@ -995,7 +995,7 @@ describe('action creator factory for thunks: delete relateds', () => {
 
   it('on deleting relateds, may dispatch loading and error', async done => {
     const error = new Error('oh no, error on fetching stuff');
-    const userResource = makeReduxAssets({
+    const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       relatedKeys: {

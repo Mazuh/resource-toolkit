@@ -1,4 +1,4 @@
-import { makeReduxAssets } from '../src';
+import { makeReducerAssets } from '../src';
 import { MANY_RELATED, ONE_RELATED } from '../src/redux-typings';
 
 const defaultState = {
@@ -16,7 +16,7 @@ const defaultState = {
 };
 
 describe('reducer factory: commons', () => {
-  const userResource = makeReduxAssets({ name: 'USER' });
+  const userResource = makeReducerAssets({ name: 'USER' });
 
   it('has initial state', () => {
     expect(userResource.reducer()).toEqual(defaultState);
@@ -85,7 +85,7 @@ describe('reducer factory: commons', () => {
   it('supports adapter of error messages', () => {
     const adapter = jest.fn(() => 'Any custom message here!');
 
-    const customResource = makeReduxAssets({
+    const customResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       makeMessageText: adapter,
@@ -153,7 +153,7 @@ describe('reducer factory: commons', () => {
 });
 
 describe('reducer factory: create', () => {
-  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+  const userResource = makeReducerAssets({ name: 'USER', idKey: 'id' });
 
   it('handles loading action for creating', () => {
     const action = userResource.actions.setCreating();
@@ -228,7 +228,7 @@ describe('reducer factory: create', () => {
 });
 
 describe('reducer factory: read', () => {
-  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+  const userResource = makeReducerAssets({ name: 'USER', idKey: 'id' });
 
   it('handles loading action for reading blindly', () => {
     const action = userResource.actions.setReading();
@@ -323,7 +323,7 @@ describe('reducer factory: read', () => {
 });
 
 describe('reducer factory: update', () => {
-  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+  const userResource = makeReducerAssets({ name: 'USER', idKey: 'id' });
 
   it('handles loading action for updating', () => {
     const action = userResource.actions.setUpdating(42);
@@ -407,7 +407,7 @@ describe('reducer factory: update', () => {
 });
 
 describe('reducer factory: delete', () => {
-  const userResource = makeReduxAssets({ name: 'USER', idKey: 'id' });
+  const userResource = makeReducerAssets({ name: 'USER', idKey: 'id' });
 
   it('handles loading action for deleting', () => {
     const action = userResource.actions.setDeleting(3);
@@ -484,7 +484,7 @@ describe('reducer factory: delete', () => {
 });
 
 describe('reducer factory: relateds', () => {
-  const userResource = makeReduxAssets({
+  const userResource = makeReducerAssets({
     name: 'USER',
     idKey: 'id',
     relatedKeys: {
