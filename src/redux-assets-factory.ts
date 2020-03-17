@@ -11,6 +11,8 @@ import {
   RelatedType,
   RelatedToOne,
   RelatedToMany,
+  DictKind,
+  EntityWithMeta,
   EMPTY_INITIAL_STATE,
 } from './redux-typings';
 import {
@@ -18,6 +20,7 @@ import {
   blockNonIdentifying,
   blockNonIdentifier,
   minimalDelayedHOC,
+  blockNonDataWithMeta,
 } from '../src/utils';
 
 export type ResourceToolParams = {
@@ -25,6 +28,7 @@ export type ResourceToolParams = {
   idKey: IdentifierKey;
   relatedKeys: { [key: string]: RelatedType },
   gateway: Gateway;
+  expectAllMeta?: boolean,
   makeMessageText?: (relating: Entity | Entity[], operation: Operation, isError: boolean) => string;
 };
 export default function makeReduxAssets(params: ResourceToolParams): any {
@@ -33,6 +37,7 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
     idKey,
     gateway,
     relatedKeys = {},
+    expectAllMeta = false,
     makeMessageText = makeDefaultMessageText,
   } = params;
 
@@ -154,6 +159,11 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
       identifying: ownerIdentifier,
       relationshipKey,
     }),
+    setMeta: (meta: DictKind) => makeAction({
+      operation: 'SET_META',
+      step: 'SUCCESS',
+      content: meta,
+    }),
     clearItems: () => makeAction({
       operation: 'CLEAR_ITEMS',
       step: 'SUCCESS',
@@ -211,9 +221,18 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
 
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
-        const content = await gateway.fetchMany(null, ...args);
-        dispatch(plainActions.clearItems());
-        gracefullyDispatch(plainActions.setRead(null, content));
+        const payload = await gateway.fetchMany(null, ...args);
+        if (expectAllMeta) {
+          blockNonDataWithMeta(payload);
+
+          const { data, meta } = (payload as EntityWithMeta);
+          dispatch(plainActions.clearItems());
+          dispatch(plainActions.setMeta(meta));
+          gracefullyDispatch(plainActions.setRead(null, data));
+        } else {
+          dispatch(plainActions.clearItems());
+          gracefullyDispatch(plainActions.setRead(null, payload));
+        }
       } catch (error) {
         gracefullyDispatch(plainActions.setReadError(null, error));
       }
@@ -477,8 +496,11 @@ export default function makeReduxAssets(params: ResourceToolParams): any {
     });
     updating.isLoading = isDoingSomethingOnItself || isDoingSomethingOnRelateds;
 
-    if (operation === 'CLEAR_ITEMS') {
+    if (operation === 'SET_META') {
+      updating.meta = content;
+    } else if (operation === 'CLEAR_ITEMS') {
       updating.items = [];
+      updating.meta = {};
     } else if (operation === 'CLEAR_CURRENT_MESSAGE') {
       updating.currentMessage = null;
     } else if (isFinished) {

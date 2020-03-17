@@ -533,6 +533,145 @@ describe('action creator factory for thunks: delete', () => {
   });
 });
 
+describe('action creator factory for thunks: reading all including meta', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
+  let dispatch;
+
+  beforeEach(() => {
+    dispatch = jest.fn();
+  });
+
+  it('gateway must retrieve object with data and meta, dispatching storage for both', async () => {
+    const sampleResource = makeReduxAssets({
+      name: 'sample',
+      idKey: 'id',
+      expectAllMeta: true,
+      gateway: {
+        fetchMany: async () => {
+          return {
+            data: [
+              { id: 69, firstName: 'Marcell' },
+              { id: 42, firstName: 'Crash' },
+            ],
+            meta: {
+              page: 1,
+              previous: null,
+              next: 'example',
+              anything: 'else here',
+            },
+          };
+        },
+      },
+    });
+    const thunk = sampleResource.actions.readAll();
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(4);
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setReading(null));
+    expect(dispatch).toBeCalledWith(sampleResource.actions.clearItems());
+    expect(dispatch).toBeCalledWith(
+      sampleResource.actions.setMeta({
+        page: 1,
+        previous: null,
+        next: 'example',
+        anything: 'else here',
+      }),
+    );
+    expect(dispatch).toBeCalledWith(
+      sampleResource.actions.setRead(null, [
+        { id: 69, firstName: 'Marcell' },
+        { id: 42, firstName: 'Crash' },
+      ]),
+    );
+  });
+
+  it('throws error if gateway cant retrieve object with data and meta, dispatching error', async () => {
+    const sampleResource = makeReduxAssets({
+      name: 'sample',
+      idKey: 'id',
+      expectAllMeta: true,
+      gateway: {
+        fetchMany: async () => {
+          return [
+            { id: 69, firstName: 'Marcell' },
+            { id: 42, firstName: 'Crash' },
+          ];
+        },
+      },
+    });
+    const thunk = sampleResource.actions.readAll();
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setReading(null));
+    expect(dispatch).toBeCalledWith(
+      sampleResource.actions.setReadError(
+        null,
+        new Error('Expected Object instance as payload, but got something else of type object.'),
+      ),
+    );
+  });
+
+  it('throws error if gateway returns payload with missing data, dispatching error', async () => {
+    const sampleResource = makeReduxAssets({
+      name: 'sample',
+      idKey: 'id',
+      expectAllMeta: true,
+      gateway: {
+        fetchMany: async () => {
+          return { meta: {} };
+        },
+      },
+    });
+    const thunk = sampleResource.actions.readAll();
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setReading(null));
+    expect(dispatch).toBeCalledWith(
+      sampleResource.actions.setReadError(
+        null,
+        new Error(
+          'Expected Array or Object instance as data, but got something else of type undefined.',
+        ),
+      ),
+    );
+  });
+
+  it('throws error if gateway returns payload with missing meta, dispatching error', async () => {
+    const sampleResource = makeReduxAssets({
+      name: 'sample',
+      idKey: 'id',
+      expectAllMeta: true,
+      gateway: {
+        fetchMany: async () => {
+          return { data: [] };
+        },
+      },
+    });
+    const thunk = sampleResource.actions.readAll();
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setReading(null));
+    expect(dispatch).toBeCalledWith(
+      sampleResource.actions.setReadError(
+        null,
+        new Error('Expected Object instance as meta, but got something else of type undefined.'),
+      ),
+    );
+  });
+});
+
 describe('action creator factory for thunks: create relateds', () => {
   const realSetTimeout = global.setTimeout;
 

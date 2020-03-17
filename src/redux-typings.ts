@@ -9,6 +9,7 @@ export interface ResourceState {
   isLoading: boolean;
   finishingLogs: Message[];
   currentMessage?: Message;
+  meta: DictKind,
 }
 
 export interface ResourceAction<T extends string> {
@@ -40,6 +41,7 @@ export type Operation = (
   | 'RELATED_READ'
   | 'RELATED_UPDATED'
   | 'RELATED_DELETED'
+  | 'SET_META'
   | 'CLEAR_ITEMS'
   | 'CLEAR_CURRENT_MESSAGE'
 );
@@ -50,17 +52,25 @@ export interface Message {
   causedByError?: Error | null,
 };
 
-export interface Entity {
+export interface DictKind {
   [key: string]: any;
 }
 
+export interface Entity extends DictKind {
+}
+
+export interface EntityWithMeta {
+  data: Entity | Entity[];
+  meta: DictKind;
+}
+
 export interface RelatedToOne {
-  item: Entity,
+  item: Entity;
   isLoading: boolean;
 }
 
 export interface RelatedToMany {
-  items: Entity[],
+  items: Entity[];
   isLoading: boolean;
 }
 
@@ -94,12 +104,13 @@ export const EMPTY_INITIAL_STATE: ResourceState = Object.freeze({
   isLoading: false,
   finishingLogs: [],
   currentMessage: null,
+  meta: {},
 });
 
 export interface Gateway {
   create?: (...args: any[]) => Promise<Entity | Entity[]>;
   fetchOne?: (identifier: Identifier, ...args: any[]) => Promise<Entity>;
-  fetchMany?: (identifiers?: Identifier[], ...args: any[]) => Promise<Entity[]>;
+  fetchMany?: (identifiers?: Identifier[], ...args: any[]) => Promise<Entity[] | EntityWithMeta>;
   update?: (identifier: Identifier, ...args: any[]) => Promise<Entity>;
   delete?: (identifier: Identifier, ...args: any[]) => Promise<Entity | void>;
   createRelated?: (...args: any[]) => Promise<Entity>;

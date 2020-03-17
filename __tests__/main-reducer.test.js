@@ -12,6 +12,7 @@ const defaultState = {
   finishingLogs: [],
   currentMessage: null,
   relatedsTo: {},
+  meta: {},
 };
 
 describe('reducer factory: commons', () => {
@@ -132,11 +133,20 @@ describe('reducer factory: commons', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
+  it('handles meta set', () => {
+    const action = userResource.actions.setMeta({ page: 1, for: 'example' });
+
+    const previousState = { ...defaultState, meta: { outdated: 'stuff' } };
+    const expectedCurrentState = { ...defaultState, meta: { page: 1, for: 'example' } };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
   it('handles items clearing', () => {
     const action = userResource.actions.clearItems();
 
-    const previousState = { ...defaultState, items: ['a', 'b', 'c'] };
-    const expectedCurrentState = { ...defaultState, items: [] };
+    const previousState = { ...defaultState, items: ['a', 'b', 'c'], meta: { some: 'thing' } };
+    const expectedCurrentState = { ...defaultState, items: [], meta: {} };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });

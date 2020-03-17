@@ -50,6 +50,22 @@ export function blockNonIdentifier(identifier: any) {
   }
 }
 
+export function blockNonDataWithMeta(payload: any) {
+  if (!isObjectInstance(payload) || isArrayInstance(payload)) {
+    throw new Error(`Expected Object instance as payload, but got something else of type ${typeof payload}.`);
+  }
+
+  const { data } = payload;
+  if (!isObjectInstance(data) || !isArrayInstance(data)) {
+    throw new Error(`Expected Array or Object instance as data, but got something else of type ${typeof data}.`);
+  }
+
+  const { meta } = payload;
+  if (!isObjectInstance(meta)) {
+    throw new Error(`Expected Object instance as meta, but got something else of type ${typeof meta}.`);
+  }
+}
+
 export function minimalDelayedHOC(func: GenericFunction, threshold: number = 1000): GenericFunction {
   const initialTime = Date.now();
   const thresholdTime = initialTime + threshold;
@@ -67,3 +83,7 @@ export function minimalDelayedHOC(func: GenericFunction, threshold: number = 100
 type GenericFunction = (...args: any[]) => void;
 
 const validIdentifierTypes = ['string', 'number'];
+
+const isObjectInstance = (x: any) => x instanceof Object;
+
+const isArrayInstance = (x: any) => Array.isArray(x);
