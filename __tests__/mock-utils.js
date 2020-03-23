@@ -8,10 +8,3 @@ export const makeMockedFetchFn = responseBody =>
 
     return response;
   });
-
-export const defaultEmptyMeta = {};
-
-export const defaultPaginatedMeta = {
-  previous: 'https://previous-page',
-  next: 'https://next-page',
-};

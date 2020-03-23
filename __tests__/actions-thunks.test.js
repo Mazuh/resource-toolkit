@@ -1,5 +1,5 @@
 import { makeReducerAssets } from '../src';
-import { makeMockedFetchFn, defaultEmptyMeta, defaultPaginatedMeta } from './mock-utils';
+import { makeMockedFetchFn, defaultEmptyMeta } from './mock-utils';
 import { ResourceToolkitError } from '../src/utils';
 
 describe('action creator factory for thunks: commons', () => {
@@ -226,7 +226,6 @@ describe('action creator factory for thunks: read', () => {
             lastName: 'Bandicoot',
           },
         ],
-        meta: defaultPaginatedMeta,
       }),
     };
 
