@@ -119,18 +119,30 @@ export function blockNonEntityFn(idKey: IdentifierKey) {
   };
 }
 
-export function minimalDelayedHOC(func: GenericFunction, threshold: number = 1000): GenericFunction {
+export function minimalDelayedHOC(func: GenericFunction, threshold: number = 1000): GenericAsyncFunction {
   const initialTime = Date.now();
   const thresholdTime = initialTime + threshold;
 
-  return (...args: any[]): void => {
-    const pendingTime = thresholdTime - Date.now();
-    if (pendingTime > 0) {
-      global.setTimeout(() => func(...args), pendingTime);
-    } else {
-      func(...args);
-    }
-  };
+  return function minimalDelayedDo(...args: any[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const pendingTime = thresholdTime - Date.now();
+      if (pendingTime > 0) {
+        global.setTimeout(() => {
+          try {
+            resolve(func(...args));
+          } catch (error) {
+            reject(error);
+          }
+        }, pendingTime);
+      } else {
+        try {
+          resolve(func(...args));
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+  }
 }
 
 export const isObjectInstance = (x: any) => x instanceof Object;
@@ -138,5 +150,7 @@ export const isObjectInstance = (x: any) => x instanceof Object;
 export const isArrayInstance = (x: any) => Array.isArray(x);
 
 type GenericFunction = (...args: any[]) => void;
+
+type GenericAsyncFunction = (...args: any[]) => Promise<void>;
 
 const validIdentifierTypes = ['string', 'number'];

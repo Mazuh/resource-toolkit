@@ -3,6 +3,16 @@ import { makeMockedFetchFn, defaultEmptyMeta } from './mock-utils';
 import { ResourceToolkitError } from '../src/utils';
 
 describe('action creator factory for thunks: commons', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
   let dispatch;
 
   beforeEach(() => {

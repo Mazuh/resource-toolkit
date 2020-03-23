@@ -213,9 +213,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         const content = await gateway.create(...args);
         blockNonEntity(content);
 
-        gracefullyDispatch(plainActions.setCreated(content));
+        await gracefullyDispatch(plainActions.setCreated(content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setCreateError(error));
+        await gracefullyDispatch(plainActions.setCreateError(error));
         handleError(error);
       }
     },
@@ -229,9 +229,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         const content = await gateway.fetchOne(identifier, ...args);
         blockNonEntity(content);
 
-        gracefullyDispatch(plainActions.setRead(identifier, content));
+        await gracefullyDispatch(plainActions.setRead(identifier, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setReadError(identifier, error));
+        await gracefullyDispatch(plainActions.setReadError(identifier, error));
       }
     },
     readMany: (identifers: Identifier[] = null, ...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -246,9 +246,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         const content = await gateway.fetchMany(identifers, ...args);
         blockNonEntities(content);
 
-        gracefullyDispatch(plainActions.setRead(identifers, content));
+        await gracefullyDispatch(plainActions.setRead(identifers, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setReadError(identifers, error));
+        await gracefullyDispatch(plainActions.setReadError(identifers, error));
         handleError(error);
       }
     },
@@ -256,26 +256,31 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       dispatch(plainActions.setReading());
       dispatch(plainActions.setIsReadingAll(true));
 
-      const gracefullyDispatch = minimalDelayedHOC(dispatch);
+      const gracefullyDispatchError = minimalDelayedHOC((error: Error) => {
+        dispatch(plainActions.setReadError(null, error))
+      });
       try {
+        const gracefullyDispatchSuccess = minimalDelayedHOC((payload: EntityWithMeta|Entity[]) => {
+          if (expectAllMeta) {
+            blockNonDataWithMeta(payload);
+
+            dispatch(plainActions.clearItems());
+            const { data, meta } = (payload as EntityWithMeta);
+            blockNonEntities(data);
+
+            dispatch(plainActions.setMeta(meta));
+            dispatch(plainActions.setRead(null, data));
+          } else {
+            blockNonEntities(payload);
+
+            dispatch(plainActions.clearItems());
+            dispatch(plainActions.setRead(null, payload));
+          }
+        });
         const payload = await gateway.fetchMany(null, ...args);
-        if (expectAllMeta) {
-          blockNonDataWithMeta(payload);
-
-          const { data, meta } = (payload as EntityWithMeta);
-          blockNonEntities(data);
-
-          dispatch(plainActions.clearItems());
-          dispatch(plainActions.setMeta(meta));
-          gracefullyDispatch(plainActions.setRead(null, data));
-        } else {
-          blockNonEntities(payload);
-
-          dispatch(plainActions.clearItems());
-          gracefullyDispatch(plainActions.setRead(null, payload));
-        }
+        await gracefullyDispatchSuccess(payload);
       } catch (error) {
-        gracefullyDispatch(plainActions.setReadError(null, error));
+        await gracefullyDispatchError(error);
         handleError(error);
       } finally {
         dispatch(plainActions.setIsReadingAll(false));
@@ -291,9 +296,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         const content = await gateway.update(identifier, ...args);
         blockNonEntity(content);
 
-        gracefullyDispatch(plainActions.setUpdated(identifier, content));
+        await gracefullyDispatch(plainActions.setUpdated(identifier, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setUpdateError(identifier, error));
+        await gracefullyDispatch(plainActions.setUpdateError(identifier, error));
         handleError(error);
       }
     },
@@ -305,9 +310,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         await gateway.delete(identifier, ...args);
-        gracefullyDispatch(plainActions.setDeleted(identifier));
+        await gracefullyDispatch(plainActions.setDeleted(identifier));
       } catch (error) {
-        gracefullyDispatch(plainActions.setDeleteError(identifier, error));
+        await gracefullyDispatch(plainActions.setDeleteError(identifier, error));
         handleError(error);
       }
     },
@@ -318,9 +323,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.fetchRelated(ownerIdentifier, relationshipKey, ...args);
-        gracefullyDispatch(plainActions.setRelatedRead(ownerIdentifier, relationshipKey, content));
+        await gracefullyDispatch(plainActions.setRelatedRead(ownerIdentifier, relationshipKey, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        await gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
         handleError(error);
       }
     },
@@ -332,9 +337,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.createRelated(ownerIdentifier, relationshipKey, ...args);
-        gracefullyDispatch(plainActions.setRelatedCreated(ownerIdentifier, relationshipKey, content));
+        await gracefullyDispatch(plainActions.setRelatedCreated(ownerIdentifier, relationshipKey, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        await gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
         handleError(error);
       }
     },
@@ -346,9 +351,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.updateRelated(ownerIdentifier, relationshipKey, ...args);
-        gracefullyDispatch(plainActions.setRelatedUpdated(ownerIdentifier, relationshipKey, content));
+        await gracefullyDispatch(plainActions.setRelatedUpdated(ownerIdentifier, relationshipKey, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        await gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
         handleError(error);
       }
     },
@@ -360,9 +365,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.deleteRelated(ownerIdentifier, relationshipKey, ...args);
-        gracefullyDispatch(plainActions.setRelatedDeleted(ownerIdentifier, relationshipKey, content));
+        await gracefullyDispatch(plainActions.setRelatedDeleted(ownerIdentifier, relationshipKey, content));
       } catch (error) {
-        gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        await gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
         handleError(error);
       }
     },
