@@ -14,7 +14,7 @@ import {
   DictKind,
   EntityWithMeta,
   EMPTY_INITIAL_STATE,
-} from './redux-typings';
+} from './reducer-typings';
 import {
   makeDefaultMessageText,
   blockNonIdentifying,
@@ -23,7 +23,7 @@ import {
   blockNonEntityFn,
   blockNonEntitiesFn,
   minimalDelayedHOC,
-} from '../src/utils';
+} from './utils';
 
 export type ResourceToolParams = {
   name: string;

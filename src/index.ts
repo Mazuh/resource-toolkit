@@ -1,4 +1,4 @@
-import makeReducerAssets from './redux-assets-factory';
+import makeReducerAssets from './reducer-assets-factory';
 
 // alias
 const makeReduxAssets = makeReducerAssets;

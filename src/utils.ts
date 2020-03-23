@@ -1,4 +1,4 @@
-import { Entity, Operation, IdentifierKey } from './redux-typings';
+import { Entity, Operation, IdentifierKey } from './reducer-typings';
 
 export class ResourceToolkitError extends Error {}
 

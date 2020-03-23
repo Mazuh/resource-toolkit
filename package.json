@@ -23,7 +23,13 @@
   },
   "license": "MIT",
   "keywords": [
-    "state, immutable, predictable, resource, toolkit, async, requests"
+    "state",
+    "immutable",
+    "resource",
+    "toolkit",
+    "async",
+    "requests",
+    "redux"
   ],
   "homepage": "https://github.com/mazuh/resource-toolkit",
   "bugs": {

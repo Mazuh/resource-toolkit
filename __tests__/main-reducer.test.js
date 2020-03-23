@@ -1,5 +1,5 @@
 import { makeReducerAssets } from '../src';
-import { MANY_RELATED, ONE_RELATED } from '../src/redux-typings';
+import { MANY_RELATED, ONE_RELATED } from '../src/reducer-typings';
 import { ResourceToolkitError } from '../src/utils';
 
 const defaultState = {
