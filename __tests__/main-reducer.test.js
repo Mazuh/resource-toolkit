@@ -33,14 +33,23 @@ describe('reducer factory: runtime validation', () => {
     expect(() => makeReducerAssets({ name: '' })).toThrow(
       'Expected truthy "name" string on assets factory, got something else of type string.',
     );
-    expect(() => makeReducerAssets({})).toThrow(
-      'Expected truthy "name" string on assets factory, got something else of type undefined.',
+  });
+
+  it('fails to be created if no truthy idKey string is provided', () => {
+    expect(() => makeReducerAssets({ name: 'sample' })).toThrow(
+      'Expected truthy "idKey" string on assets factory, got something else of type undefined.',
+    );
+    expect(() => makeReducerAssets({ name: 'sample', idKey: null })).toThrow(
+      'Expected truthy "idKey" string on assets factory, got something else of type object.',
+    );
+    expect(() => makeReducerAssets({ name: 'sample', idKey: '' })).toThrow(
+      'Expected truthy "idKey" string on assets factory, got something else of type string.',
     );
   });
 });
 
 describe('reducer factory: commons', () => {
-  const userResource = makeReducerAssets({ name: 'USER' });
+  const userResource = makeReducerAssets({ name: 'USER', idKey: 'id' });
 
   it('has initial state', () => {
     expect(userResource.reducer()).toEqual(defaultState);

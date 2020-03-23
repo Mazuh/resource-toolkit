@@ -57,6 +57,10 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
     throw new ResourceToolkitError(`Expected truthy "name" string on assets factory, got something else of type ${typeof name}.`);
   }
 
+  if (!idKey || typeof idKey !== 'string') {
+    throw new ResourceToolkitError(`Expected truthy "idKey" string on assets factory, got something else of type ${typeof idKey}.`);
+  }
+
   const handleError = handleErrorFn(name, logLibError);
 
   const actionType = `RESOURCE_TOOLKIT__${name}`;
@@ -201,8 +205,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
   const blockNonEntity = blockNonEntityFn(idKey);
   const blockNonEntities = blockNonEntitiesFn(idKey);
 
-  const actions = {
-    ...plainActions,
+  const actionThunks = {
     create: (...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setCreating());
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
@@ -573,8 +576,13 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
   return {
     initialState,
     actionType,
+    plainActions,
+    actionThunks,
+    actions: {
+      ...plainActions,
+      ...actionThunks,
+    },
     makeAction,
-    actions,
     reducer,
   };
 }
