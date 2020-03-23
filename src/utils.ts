@@ -132,10 +132,10 @@ export function minimalDelayedHOC(func: GenericFunction, threshold: number = 100
   };
 }
 
+export const isObjectInstance = (x: any) => x instanceof Object;
+
+export const isArrayInstance = (x: any) => Array.isArray(x);
+
 type GenericFunction = (...args: any[]) => void;
 
 const validIdentifierTypes = ['string', 'number'];
-
-const isObjectInstance = (x: any) => x instanceof Object;
-
-const isArrayInstance = (x: any) => Array.isArray(x);

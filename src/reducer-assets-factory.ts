@@ -16,6 +16,7 @@ import {
   EMPTY_INITIAL_STATE,
 } from './reducer-typings';
 import {
+  ResourceToolkitError,
   makeDefaultMessageText,
   handleErrorFn,
   blockNonIdentifying,
@@ -24,6 +25,8 @@ import {
   blockNonEntityFn,
   blockNonEntitiesFn,
   minimalDelayedHOC,
+  isObjectInstance,
+  isArrayInstance,
 } from './utils';
 
 export type ResourceToolParams = {
@@ -36,6 +39,10 @@ export type ResourceToolParams = {
   logLibError?: typeof console.error;
 };
 export default function makeReducerAssets(params: ResourceToolParams): any {
+  if (!isObjectInstance(params) || isArrayInstance(params)) {
+    throw new ResourceToolkitError(`Expected params object on assets factory, got something else of type ${typeof params}.`);
+  }
+
   const {
     name,
     idKey,
@@ -45,6 +52,10 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
     makeMessageText = makeDefaultMessageText,
     logLibError = console.error,
   } = params;
+
+  if (!name || typeof name !== 'string') {
+    throw new ResourceToolkitError(`Expected truthy "name" string on assets factory, got something else of type ${typeof name}.`);
+  }
 
   const handleError = handleErrorFn(name, logLibError);
 

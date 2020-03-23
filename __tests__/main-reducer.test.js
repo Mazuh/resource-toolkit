@@ -16,6 +16,29 @@ const defaultState = {
   meta: {},
 };
 
+describe('reducer factory: runtime validation', () => {
+  it('fails to be created if no options are provided', () => {
+    expect(() => makeReducerAssets()).toThrow(
+      'Expected params object on assets factory, got something else of type undefined.',
+    );
+  });
+
+  it('fails to be created if no truthy name string is provided', () => {
+    expect(() => makeReducerAssets({})).toThrow(
+      'Expected truthy "name" string on assets factory, got something else of type undefined.',
+    );
+    expect(() => makeReducerAssets({ name: null })).toThrow(
+      'Expected truthy "name" string on assets factory, got something else of type object.',
+    );
+    expect(() => makeReducerAssets({ name: '' })).toThrow(
+      'Expected truthy "name" string on assets factory, got something else of type string.',
+    );
+    expect(() => makeReducerAssets({})).toThrow(
+      'Expected truthy "name" string on assets factory, got something else of type undefined.',
+    );
+  });
+});
+
 describe('reducer factory: commons', () => {
   const userResource = makeReducerAssets({ name: 'USER' });
 
