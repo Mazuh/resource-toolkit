@@ -3,14 +3,14 @@ export interface ResourceState {
   relatedsTo: IndexedRelationships;
   isCreating: boolean;
   isReadingBlindly: boolean;
-  isReadingAll: boolean,
+  isReadingAll: boolean;
   reading: Identifier[];
   updating: Identifier[];
   deleting: Identifier[];
   isLoading: boolean;
   finishingLogs: Message[];
   currentMessage?: Message;
-  meta: DictKind,
+  meta: DictKind;
 }
 
 export interface ResourceAction<T extends string> {
@@ -23,7 +23,7 @@ export interface ResourceIntent {
   step: Step;
   identifying?: Identifier | Identifier[];
   content?: Entity | Entity[] | Error;
-  relationshipKey?: string,
+  relationshipKey?: string;
 }
 
 export type Step = (
@@ -52,7 +52,7 @@ export type Operation = (
 export interface Message {
   text: string;
   isError: boolean;
-  causedByError?: Error | null,
+  causedByError?: Error | null;
 };
 
 export interface DictKind {

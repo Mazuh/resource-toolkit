@@ -28,9 +28,9 @@ import {
 export type ResourceToolParams = {
   name: string;
   idKey: IdentifierKey;
-  relatedKeys: { [key: string]: RelatedType },
+  relatedKeys: { [key: string]: RelatedType };
   gateway: Gateway;
-  expectAllMeta?: boolean,
+  expectAllMeta?: boolean;
   makeMessageText?: (relating: Entity | Entity[], operation: Operation, isError: boolean) => string;
 };
 export default function makeReducerAssets(params: ResourceToolParams): any {
