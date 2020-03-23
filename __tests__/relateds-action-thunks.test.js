@@ -70,6 +70,7 @@ describe('action creator factory for thunks: create relateds', () => {
       gateway: {
         createRelated: jest.fn(() => Promise.reject(error)),
       },
+      logLibError: () => {},
     });
 
     const userId = 42;
@@ -168,6 +169,7 @@ describe('action creator factory for thunks: read relateds', () => {
       gateway: {
         fetchRelated: jest.fn(() => Promise.reject(error)),
       },
+      logLibError: () => {},
     });
 
     const userId = 42;
@@ -252,6 +254,7 @@ describe('action creator factory for thunks: update relateds', () => {
       gateway: {
         updateRelated: jest.fn(() => Promise.reject(error)),
       },
+      logLibError: () => {},
     });
 
     const userId = 42;
@@ -334,6 +337,7 @@ describe('action creator factory for thunks: delete relateds', () => {
       gateway: {
         deleteRelated: jest.fn(() => Promise.reject(error)),
       },
+      logLibError: () => {},
     });
 
     const userId = 42;

@@ -1,10 +1,12 @@
 import {
   makeDefaultMessageText,
+  handleErrorFn,
   blockNonIdentifying,
   blockNonIdentifier,
   blockNonEntityFn,
   blockNonEntitiesFn,
   minimalDelayedHOC,
+  ResourceToolkitError,
 } from '../src/utils';
 
 describe('makeDefaultMessageText', () => {
@@ -17,6 +19,28 @@ describe('makeDefaultMessageText', () => {
     const isError = true;
     const text = makeDefaultMessageText('oeoe', 123, isError);
     expect(text).toBe('Unknown and unexpected error response.');
+  });
+});
+
+describe('handleErrorFn (closure factory)', () => {
+  let logMock = jest.fn();
+  let handleError;
+
+  beforeEach(() => {
+    logMock = jest.fn();
+    handleError = handleErrorFn('my-resource-namespace', logMock);
+  });
+
+  it('calls provided log when handling lib errors', () => {
+    const libError = new ResourceToolkitError('Internal error');
+    handleError(libError);
+    expect(logMock).toBeCalledWith('[my-resource-namespace]', libError);
+  });
+
+  it('not call provided log when handling unknown type of errors', () => {
+    const unknownError = new Error('Internal error');
+    handleError(unknownError);
+    expect(logMock).not.toBeCalled();
   });
 });
 
@@ -88,7 +112,7 @@ describe('blockNonIdentifier', () => {
   });
 });
 
-describe('blockNonEntityFn', () => {
+describe('blockNonEntityFn (closure factory)', () => {
   const blockNonEntity = blockNonEntityFn('entityId');
 
   it('not throw anything if payload is a valid Entity', () => {
@@ -136,7 +160,7 @@ describe('blockNonEntityFn', () => {
   });
 });
 
-describe('blockNonEntitiesFn', () => {
+describe('blockNonEntitiesFn (closure factory)', () => {
   const blockNonEntities = blockNonEntitiesFn('entityId');
 
   it('not throw anything if payload is Array with a valid set of Entity', () => {

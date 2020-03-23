@@ -27,6 +27,14 @@ export function makeDefaultMessageText(relating: Entity | Entity[], operation: O
   }
 }
 
+export function handleErrorFn(namespace: string, logLibError: typeof console.error) {
+  return function handleError(error: Error) {
+    if (error instanceof ResourceToolkitError) {
+      logLibError(`[${namespace}]`, error);
+    }
+  }
+}
+
 export function blockNonIdentifying(identifying: any) {
   if (!Array.isArray(identifying)) {
     blockNonIdentifier(identifying);

@@ -33,6 +33,7 @@ describe('action creator factory for thunks: commons', () => {
         updateRelated: gatewayUpdateRelated,
         deleteRelated: gatewayDeleteRelated,
       },
+      logLibError: () => {},
     });
 
     const mockId = 22;
@@ -275,6 +276,7 @@ describe('action creator factory for thunks: read', () => {
       gateway: {
         fetchMany: () => Promise.reject(error),
       },
+      logLibError: () => {},
     });
     const thunk = userResource.actions.readMany();
     await thunk(dispatch);
@@ -332,6 +334,7 @@ describe('action creator factory for thunks: read', () => {
       gateway: {
         fetchMany: () => Promise.reject(error),
       },
+      logLibError: () => {},
     });
     const thunk = userResource.actions.readAll();
     await thunk(dispatch);
@@ -381,6 +384,7 @@ describe('action creator factory for thunks: read', () => {
       gateway: {
         fetchOne: () => Promise.reject(error),
       },
+      logLibError: () => {},
     });
     const thunk = userResource.actions.readOne(69);
     await thunk(dispatch);
@@ -453,6 +457,7 @@ describe('action creator factory for thunks: update', () => {
       gateway: {
         update: () => Promise.reject(error),
       },
+      logLibError: () => {},
     });
     const sillyUpdatingData = {
       id: 42,
@@ -524,6 +529,7 @@ describe('action creator factory for thunks: delete', () => {
       gateway: {
         delete: () => Promise.reject(error),
       },
+      logLibError: () => {},
     });
     const thunk = userResource.actions.delete(42);
 
@@ -613,6 +619,7 @@ describe('action creator factory for thunks: reading all including meta', () => 
           ];
         },
       },
+      logLibError: () => {},
     });
     const thunk = sampleResource.actions.readAll();
     await thunk(dispatch);
@@ -641,6 +648,7 @@ describe('action creator factory for thunks: reading all including meta', () => 
           return { meta: {} };
         },
       },
+      logLibError: () => {},
     });
     const thunk = sampleResource.actions.readAll();
     await thunk(dispatch);
@@ -669,6 +677,7 @@ describe('action creator factory for thunks: reading all including meta', () => 
           return { data: [] };
         },
       },
+      logLibError: () => {},
     });
     const thunk = sampleResource.actions.readAll();
     await thunk(dispatch);

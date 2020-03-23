@@ -17,6 +17,7 @@ import {
 } from './reducer-typings';
 import {
   makeDefaultMessageText,
+  handleErrorFn,
   blockNonIdentifying,
   blockNonIdentifier,
   blockNonDataWithMeta,
@@ -32,6 +33,7 @@ export type ResourceToolParams = {
   gateway: Gateway;
   expectAllMeta?: boolean;
   makeMessageText?: (relating: Entity | Entity[], operation: Operation, isError: boolean) => string;
+  logLibError?: typeof console.error;
 };
 export default function makeReducerAssets(params: ResourceToolParams): any {
   const {
@@ -41,7 +43,10 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
     relatedKeys = {},
     expectAllMeta = false,
     makeMessageText = makeDefaultMessageText,
+    logLibError = console.error,
   } = params;
+
+  const handleError = handleErrorFn(name, logLibError);
 
   const actionType = `RESOURCE_TOOLKIT__${name}`;
 
@@ -197,6 +202,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setCreated(content));
       } catch (error) {
         gracefullyDispatch(plainActions.setCreateError(error));
+        handleError(error);
       }
     },
     readOne: (identifier: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -229,6 +235,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setRead(identifers, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setReadError(identifers, error));
+        handleError(error);
       }
     },
     readAll: (...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -255,6 +262,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         }
       } catch (error) {
         gracefullyDispatch(plainActions.setReadError(null, error));
+        handleError(error);
       } finally {
         dispatch(plainActions.setIsReadingAll(false));
       }
@@ -272,6 +280,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setUpdated(identifier, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setUpdateError(identifier, error));
+        handleError(error);
       }
     },
     delete: (identifier: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -285,6 +294,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setDeleted(identifier));
       } catch (error) {
         gracefullyDispatch(plainActions.setDeleteError(identifier, error));
+        handleError(error);
       }
     },
     readRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -297,6 +307,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setRelatedRead(ownerIdentifier, relationshipKey, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        handleError(error);
       }
     },
     createRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -310,6 +321,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setRelatedCreated(ownerIdentifier, relationshipKey, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        handleError(error);
       }
     },
     updateRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -323,6 +335,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setRelatedUpdated(ownerIdentifier, relationshipKey, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        handleError(error);
       }
     },
     deleteRelated: (ownerIdentifier: Identifier, relationshipKey: string, ...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -336,6 +349,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         gracefullyDispatch(plainActions.setRelatedDeleted(ownerIdentifier, relationshipKey, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setRelatedError(ownerIdentifier, relationshipKey, error));
+        handleError(error);
       }
     },
   };
