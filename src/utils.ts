@@ -1,5 +1,7 @@
 import { Entity, Operation, IdentifierKey } from './redux-typings';
 
+export class ResourceToolkitError extends Error {}
+
 export function makeDefaultMessageText(relating: Entity | Entity[], operation: Operation, isError: boolean): string {
   const attachmentForMany = Array.isArray(relating) ? ` Related to ${relating.length} items.` : '';
 
@@ -32,13 +34,13 @@ export function blockNonIdentifying(identifying: any) {
   }
 
   if (identifying.length === 0) {
-    throw new Error('Expected ids with string or numbers, but got the array empty.');
+    throw new ResourceToolkitError('Expected ids with string or numbers, but got the array empty.');
   }
 
   identifying.forEach((identifier: any) => {
     const idType = typeof identifier;
     if (!validIdentifierTypes.includes(idType)) {
-      throw new Error(`Expected ids as strings or numbers, but got an array with ${idType}.`);
+      throw new ResourceToolkitError(`Expected ids as strings or numbers, but got an array with ${idType}.`);
     }
   });
 }
@@ -46,43 +48,43 @@ export function blockNonIdentifying(identifying: any) {
 export function blockNonIdentifier(identifier: any) {
   const idType = typeof identifier;
   if (!validIdentifierTypes.includes(idType)) {
-    throw new Error(`Expected unique id to be string or number, but got ${idType}.`);
+    throw new ResourceToolkitError(`Expected unique id to be string or number, but got ${idType}.`);
   }
 }
 
 export function blockNonDataWithMeta(payload: any) {
   if (!isObjectInstance(payload) || isArrayInstance(payload)) {
-    throw new Error(`Expected Object instance as payload, but got something else of type ${typeof payload}.`);
+    throw new ResourceToolkitError(`Expected Object instance as payload, but got something else of type ${typeof payload}.`);
   }
 
   const { data } = payload;
   if (!isObjectInstance(data) || !isArrayInstance(data)) {
-    throw new Error(`Expected Array or Object instance as data, but got something else of type ${typeof data}.`);
+    throw new ResourceToolkitError(`Expected Array or Object instance as data, but got something else of type ${typeof data}.`);
   }
 
   const { meta } = payload;
   if (!isObjectInstance(meta)) {
-    throw new Error(`Expected Object instance as meta, but got something else of type ${typeof meta}.`);
+    throw new ResourceToolkitError(`Expected Object instance as meta, but got something else of type ${typeof meta}.`);
   }
 }
 
 export function blockNonEntitiesFn(idKey: IdentifierKey) {
   return function blockNonEntities(items: any) {
     if (!isArrayInstance(items)) {
-      throw new Error(`Expected Array instance as gateway return, but got something else of type ${typeof items}.`);
+      throw new ResourceToolkitError(`Expected Array instance as gateway return, but got something else of type ${typeof items}.`);
     }
 
     items.forEach((item: any, index: number) => {
       if (!isObjectInstance(item) || isArrayInstance(item)) {
-        throw new Error(`Expected single Object instances in gateway items, but got something else of type ${typeof item} at index ${index}.`);
+        throw new ResourceToolkitError(`Expected single Object instances in gateway items, but got something else of type ${typeof item} at index ${index}.`);
       }
 
       if (!item[idKey]) {
-        throw new Error(`Expected truthy "entityId" in gateway items, but got something else of type ${typeof item[idKey]} at index ${index}.`);
+        throw new ResourceToolkitError(`Expected truthy "entityId" in gateway items, but got something else of type ${typeof item[idKey]} at index ${index}.`);
       }
 
       if (!['string', 'number'].includes(typeof item[idKey])) {
-        throw new Error(`Expected string or number for "${idKey}" in gateway items, but got something else of type ${typeof item[idKey]} at index ${index}.`);
+        throw new ResourceToolkitError(`Expected string or number for "${idKey}" in gateway items, but got something else of type ${typeof item[idKey]} at index ${index}.`);
       }
     });
   }
@@ -91,19 +93,19 @@ export function blockNonEntitiesFn(idKey: IdentifierKey) {
 export function blockNonEntityFn(idKey: IdentifierKey) {
   return function blockNonEntity(item: any) {
     if (isArrayInstance(item)) {
-      throw new Error('Expected single Object instance as gateway return, but got an Array.');
+      throw new ResourceToolkitError('Expected single Object instance as gateway return, but got an Array.');
     }
 
     if (!isObjectInstance(item)) {
-      throw new Error(`Expected Object instance as gateway return, but got something else of type ${typeof item}.`);
+      throw new ResourceToolkitError(`Expected Object instance as gateway return, but got something else of type ${typeof item}.`);
     }
 
     if (!item[idKey]) {
-      throw new Error(`Expected truthy "${idKey}" in gateway return, but got something else of type ${typeof item[idKey]}.`);
+      throw new ResourceToolkitError(`Expected truthy "${idKey}" in gateway return, but got something else of type ${typeof item[idKey]}.`);
     }
 
     if (!['string', 'number'].includes(typeof item[idKey])) {
-      throw new Error(`Expected string or number for "${idKey}" in gateway return, but got something else of type ${typeof item[idKey]}.`);
+      throw new ResourceToolkitError(`Expected string or number for "${idKey}" in gateway return, but got something else of type ${typeof item[idKey]}.`);
     }
   };
 }

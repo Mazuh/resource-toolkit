@@ -1,5 +1,6 @@
 import { makeReducerAssets } from '../src';
 import { makeMockedFetchFn, defaultEmptyMeta, defaultPaginatedMeta } from './mock-utils';
+import { ResourceToolkitError } from '../src/utils';
 
 describe('action creator factory for thunks: commons', () => {
   let dispatch;
@@ -268,7 +269,7 @@ describe('action creator factory for thunks: read', () => {
   });
 
   it('on reading many blindly, dispatchs loading and error', async done => {
-    const error = new Error('Programming error');
+    const error = new ResourceToolkitError('Programming error');
     const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
@@ -323,7 +324,7 @@ describe('action creator factory for thunks: read', () => {
   });
 
   it('on reading all, dispatchs loading and error', async done => {
-    const error = new Error('Programming error');
+    const error = new ResourceToolkitError('Programming error');
     const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
@@ -370,7 +371,7 @@ describe('action creator factory for thunks: read', () => {
   });
 
   it('on reading one, dispatchs loading and error', async done => {
-    const error = new Error('Programming error');
+    const error = new ResourceToolkitError('Programming error');
     const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
@@ -442,7 +443,7 @@ describe('action creator factory for thunks: update', () => {
   });
 
   it('on updating, dispatchs loading and error', async done => {
-    const error = new Error('Programming error');
+    const error = new ResourceToolkitError('Programming error');
     const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
@@ -513,7 +514,7 @@ describe('action creator factory for thunks: delete', () => {
   });
 
   it('on deleting, dispatchs loading and error', async done => {
-    const error = new Error('Programming error');
+    const error = new ResourceToolkitError('Programming error');
     const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
@@ -616,7 +617,9 @@ describe('action creator factory for thunks: reading all including meta', () => 
     expect(dispatch).toBeCalledWith(
       sampleResource.actions.setReadError(
         null,
-        new Error('Expected Object instance as payload, but got something else of type object.'),
+        new ResourceToolkitError(
+          'Expected Object instance as payload, but got something else of type object.',
+        ),
       ),
     );
   });
@@ -640,7 +643,7 @@ describe('action creator factory for thunks: reading all including meta', () => 
     expect(dispatch).toBeCalledWith(
       sampleResource.actions.setReadError(
         null,
-        new Error(
+        new ResourceToolkitError(
           'Expected Array or Object instance as data, but got something else of type undefined.',
         ),
       ),
@@ -666,7 +669,9 @@ describe('action creator factory for thunks: reading all including meta', () => 
     expect(dispatch).toBeCalledWith(
       sampleResource.actions.setReadError(
         null,
-        new Error('Expected Object instance as meta, but got something else of type undefined.'),
+        new ResourceToolkitError(
+          'Expected Object instance as meta, but got something else of type undefined.',
+        ),
       ),
     );
   });
@@ -730,7 +735,7 @@ describe('action creator factory for thunks: create relateds', () => {
   });
 
   it('on reading relateds, may dispatch loading and error', async done => {
-    const error = new Error('oh no, error on fetching stuff');
+    const error = new ResourceToolkitError('oh no, error on fetching stuff');
     const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
@@ -828,7 +833,7 @@ describe('action creator factory for thunks: read relateds', () => {
   });
 
   it('on reading relateds, may dispatch loading and error', async done => {
-    const error = new Error('oh no, error on fetching stuff');
+    const error = new ResourceToolkitError('oh no, error on fetching stuff');
     const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
@@ -912,7 +917,7 @@ describe('action creator factory for thunks: update relateds', () => {
   });
 
   it('on updating relateds, may dispatch loading and error', async done => {
-    const error = new Error('oh no, error on fetching stuff');
+    const error = new ResourceToolkitError('oh no, error on fetching stuff');
     const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
@@ -994,7 +999,7 @@ describe('action creator factory for thunks: delete relateds', () => {
   });
 
   it('on deleting relateds, may dispatch loading and error', async done => {
-    const error = new Error('oh no, error on fetching stuff');
+    const error = new ResourceToolkitError('oh no, error on fetching stuff');
     const userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',

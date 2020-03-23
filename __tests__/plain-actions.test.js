@@ -1,4 +1,5 @@
 import { makeReducerAssets } from '../src';
+import { ResourceToolkitError } from '../src/utils';
 
 describe('action factory with plain actions', () => {
   let userResource;
@@ -64,7 +65,7 @@ describe('action factory with plain actions', () => {
   });
 
   it('has action for set reading error', () => {
-    const error = new Error('Some error message');
+    const error = new ResourceToolkitError('Some error message');
     const action = userResource.actions.setReadError(null, error);
     const expectedAction = userResource.makeAction({
       operation: 'READ',

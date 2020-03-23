@@ -1,5 +1,6 @@
 import { makeReducerAssets } from '../src';
 import { MANY_RELATED, ONE_RELATED } from '../src/redux-typings';
+import { ResourceToolkitError } from '../src/utils';
 
 const defaultState = {
   items: [],
@@ -31,7 +32,7 @@ describe('reducer factory: commons', () => {
   });
 
   it('handles some error action by at least storing its log', () => {
-    const error = new Error('Weird random programming error at reading');
+    const error = new ResourceToolkitError('Weird random programming error at reading');
 
     const action = userResource.actions.setReadError(null, error);
 
@@ -91,7 +92,7 @@ describe('reducer factory: commons', () => {
       makeMessageText: adapter,
     });
 
-    const error = new Error('Weird random programming error at reading');
+    const error = new ResourceToolkitError('Weird random programming error at reading');
     const action = customResource.actions.setReadError([1, 2], error);
 
     const expectedErrorMessage = {
@@ -201,7 +202,7 @@ describe('reducer factory: create', () => {
   });
 
   it('handles error action for creating', () => {
-    const error = new Error('No creation here');
+    const error = new ResourceToolkitError('No creation here');
     const expectedMessage = {
       causedByError: error,
       isError: true,
@@ -380,7 +381,7 @@ describe('reducer factory: update', () => {
   });
 
   it('handles error action for updating', () => {
-    const error = new Error('Weird random programming error at reading');
+    const error = new ResourceToolkitError('Weird random programming error at reading');
     const expectedMessage = {
       causedByError: error,
       isError: true,
@@ -449,7 +450,7 @@ describe('reducer factory: delete', () => {
   });
 
   it('handles error action for deleting', () => {
-    const error = new Error('No deleting here');
+    const error = new ResourceToolkitError('No deleting here');
     const expectedMessage = {
       causedByError: error,
       isError: true,
@@ -754,7 +755,7 @@ describe('reducer factory: relateds', () => {
   });
 
   it('handles error action', () => {
-    const error = new Error('Weird error on reading related stuff');
+    const error = new ResourceToolkitError('Weird error on reading related stuff');
 
     const action = userResource.actions.setRelatedError(42, 'books', error);
 
