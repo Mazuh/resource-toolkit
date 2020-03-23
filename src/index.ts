@@ -1,4 +1,5 @@
 import makeReducerAssets from './reducer-assets-factory';
+import { makeDefaultMessageText } from './utils';
 
 // alias
 const makeReduxAssets = makeReducerAssets;
@@ -7,4 +8,5 @@ const makeReduxAssets = makeReducerAssets;
 export {
   makeReducerAssets,
   makeReduxAssets,
+  makeDefaultMessageText,
 };
