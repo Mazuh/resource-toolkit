@@ -1,4 +1,4 @@
-import { Entity, Operation } from './redux-typings';
+import { Entity, Operation, IdentifierKey } from './redux-typings';
 
 export function makeDefaultMessageText(relating: Entity | Entity[], operation: Operation, isError: boolean): string {
   const attachmentForMany = Array.isArray(relating) ? ` Related to ${relating.length} items.` : '';
@@ -64,6 +64,48 @@ export function blockNonDataWithMeta(payload: any) {
   if (!isObjectInstance(meta)) {
     throw new Error(`Expected Object instance as meta, but got something else of type ${typeof meta}.`);
   }
+}
+
+export function blockNonEntitiesFn(idKey: IdentifierKey) {
+  return function blockNonEntities(items: any) {
+    if (!isArrayInstance(items)) {
+      throw new Error(`Expected Array instance as gateway return, but got something else of type ${typeof items}.`);
+    }
+
+    items.forEach((item: any, index: number) => {
+      if (!isObjectInstance(item) || isArrayInstance(item)) {
+        throw new Error(`Expected single Object instances in gateway items, but got something else of type ${typeof item} at index ${index}.`);
+      }
+
+      if (!item[idKey]) {
+        throw new Error(`Expected truthy "entityId" in gateway items, but got something else of type ${typeof item[idKey]} at index ${index}.`);
+      }
+
+      if (!['string', 'number'].includes(typeof item[idKey])) {
+        throw new Error(`Expected string or number for "${idKey}" in gateway items, but got something else of type ${typeof item[idKey]} at index ${index}.`);
+      }
+    });
+  }
+}
+
+export function blockNonEntityFn(idKey: IdentifierKey) {
+  return function blockNonEntity(item: any) {
+    if (isArrayInstance(item)) {
+      throw new Error('Expected single Object instance as gateway return, but got an Array.');
+    }
+
+    if (!isObjectInstance(item)) {
+      throw new Error(`Expected Object instance as gateway return, but got something else of type ${typeof item}.`);
+    }
+
+    if (!item[idKey]) {
+      throw new Error(`Expected truthy "${idKey}" in gateway return, but got something else of type ${typeof item[idKey]}.`);
+    }
+
+    if (!['string', 'number'].includes(typeof item[idKey])) {
+      throw new Error(`Expected string or number for "${idKey}" in gateway return, but got something else of type ${typeof item[idKey]}.`);
+    }
+  };
 }
 
 export function minimalDelayedHOC(func: GenericFunction, threshold: number = 1000): GenericFunction {

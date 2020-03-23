@@ -19,8 +19,10 @@ import {
   makeDefaultMessageText,
   blockNonIdentifying,
   blockNonIdentifier,
-  minimalDelayedHOC,
   blockNonDataWithMeta,
+  blockNonEntityFn,
+  blockNonEntitiesFn,
+  minimalDelayedHOC,
 } from '../src/utils';
 
 export type ResourceToolParams = {
@@ -176,6 +178,9 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
 
   type BoundDispatch = (action: BoundResourceActon) => void;
 
+  const blockNonEntity = blockNonEntityFn(idKey);
+  const blockNonEntities = blockNonEntitiesFn(idKey);
+
   const actions = {
     ...plainActions,
     create: (...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -183,6 +188,8 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.create(...args);
+        blockNonEntity(content);
+
         gracefullyDispatch(plainActions.setCreated(content));
       } catch (error) {
         gracefullyDispatch(plainActions.setCreateError(error));
@@ -196,6 +203,8 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.fetchOne(identifier, ...args);
+        blockNonEntity(content);
+
         gracefullyDispatch(plainActions.setRead(identifier, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setReadError(identifier, error));
@@ -211,6 +220,8 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.fetchMany(identifers, ...args);
+        blockNonEntities(content);
+
         gracefullyDispatch(plainActions.setRead(identifers, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setReadError(identifers, error));
@@ -226,10 +237,14 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
           blockNonDataWithMeta(payload);
 
           const { data, meta } = (payload as EntityWithMeta);
+          blockNonEntities(data);
+
           dispatch(plainActions.clearItems());
           dispatch(plainActions.setMeta(meta));
           gracefullyDispatch(plainActions.setRead(null, data));
         } else {
+          blockNonEntities(payload);
+
           dispatch(plainActions.clearItems());
           gracefullyDispatch(plainActions.setRead(null, payload));
         }
@@ -245,6 +260,8 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.update(identifier, ...args);
+        blockNonEntity(content);
+
         gracefullyDispatch(plainActions.setUpdated(identifier, content));
       } catch (error) {
         gracefullyDispatch(plainActions.setUpdateError(identifier, error));

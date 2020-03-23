@@ -2,6 +2,8 @@ import {
   makeDefaultMessageText,
   blockNonIdentifying,
   blockNonIdentifier,
+  blockNonEntityFn,
+  blockNonEntitiesFn,
   minimalDelayedHOC,
 } from '../src/utils';
 
@@ -83,6 +85,108 @@ describe('blockNonIdentifier', () => {
   it('not throw error if the expression is a string or a number', () => {
     expect(() => blockNonIdentifier(123)).not.toThrow();
     expect(() => blockNonIdentifier('123')).not.toThrow();
+  });
+});
+
+describe('blockNonEntityFn', () => {
+  const blockNonEntity = blockNonEntityFn('entityId');
+
+  it('not throw anything if payload is a valid Entity', () => {
+    expect(() => blockNonEntity({ entityId: 123 })).not.toThrow();
+    expect(() => blockNonEntity({ entityId: '123' })).not.toThrow();
+  });
+
+  it('throws error if payload is not Object instance', () => {
+    expect(() => blockNonEntity(undefined)).toThrow(
+      'Expected Object instance as gateway return, but got something else of type undefined.',
+    );
+    expect(() => blockNonEntity(null)).toThrow(
+      'Expected Object instance as gateway return, but got something else of type object.',
+    );
+  });
+
+  it('throws error if payload is an array (cause this util is for single entities)', () => {
+    expect(() => blockNonEntity([])).toThrow(
+      'Expected single Object instance as gateway return, but got an Array.',
+    );
+    expect(() => blockNonEntity([{ entityId: 123 }])).toThrow(
+      'Expected single Object instance as gateway return, but got an Array.',
+    );
+  });
+
+  it('throw error if payload is an object with a missing idKey truthy value', () => {
+    expect(() => blockNonEntity({ entityId: '' })).toThrow(
+      'Expected truthy "entityId" in gateway return, but got something else of type string.',
+    );
+    expect(() => blockNonEntity({ entityId: null })).toThrow(
+      'Expected truthy "entityId" in gateway return, but got something else of type object.',
+    );
+    expect(() => blockNonEntity({ typo: 'here' })).toThrow(
+      'Expected truthy "entityId" in gateway return, but got something else of type undefined.',
+    );
+  });
+
+  it('throw error if payload is an object with an invalid idKey value', () => {
+    expect(() => blockNonEntity({ entityId: [] })).toThrow(
+      'Expected string or number for "entityId" in gateway return, but got something else of type object.',
+    );
+    expect(() => blockNonEntity({ entityId: {} })).toThrow(
+      'Expected string or number for "entityId" in gateway return, but got something else of type object.',
+    );
+  });
+});
+
+describe('blockNonEntitiesFn', () => {
+  const blockNonEntities = blockNonEntitiesFn('entityId');
+
+  it('not throw anything if payload is Array with a valid set of Entity', () => {
+    expect(() => blockNonEntities([])).not.toThrow();
+    expect(() => blockNonEntities([{ entityId: 123 }])).not.toThrow();
+    expect(() => blockNonEntities([{ entityId: '123' }])).not.toThrow();
+  });
+
+  it('throws error if payload item is not Array instance', () => {
+    expect(() => blockNonEntities()).toThrow(
+      'Expected Array instance as gateway return, but got something else of type undefined.',
+    );
+    expect(() => blockNonEntities({ entityId: '123 (ops, no bracket!)' })).toThrow(
+      'Expected Array instance as gateway return, but got something else of type object.',
+    );
+    expect(() => blockNonEntities(null)).toThrow(
+      'Expected Array instance as gateway return, but got something else of type object.',
+    );
+  });
+
+  it('throw error if payload has item not being an Object instance', () => {
+    expect(() => blockNonEntities([{ entityId: 123 }, undefined])).toThrow(
+      'Expected single Object instances in gateway items, but got something else of type undefined at index 1.',
+    );
+    expect(() =>
+      blockNonEntities([[{ entityId: 123, typo: 'more brackets then it should' }]]),
+    ).toThrow(
+      'Expected single Object instances in gateway items, but got something else of type object at index 0.',
+    );
+  });
+
+  it('throw error if payload has item with a missing idKey truthy value', () => {
+    expect(() => blockNonEntities([{ entityId: 123 }, { entityId: '' }])).toThrow(
+      'Expected truthy "entityId" in gateway items, but got something else of type string at index 1.',
+    );
+    expect(() => blockNonEntities([{ entityId: null }, {}])).toThrow(
+      'Expected truthy "entityId" in gateway items, but got something else of type object at index 0.',
+    );
+    expect(() => blockNonEntities([{ entityId: 1 }, { entityId: 2 }, { typo: 'here' }])).toThrow(
+      'Expected truthy "entityId" in gateway items, but got something else of type undefined at index 2.',
+    );
+  });
+
+  it('throw error if payload has item with an invalid idKey value', () => {
+    expect(() => blockNonEntities([{ entityId: [] }])).toThrow(
+      'Expected string or number for "entityId" in gateway items, but got something else of type object at index 0.',
+    );
+    expect(() => blockNonEntities([{ entityId: {} }])).toThrow(
+      'Expected string or number for "entityId" in gateway items, but got something else of type object at index 0.',
+    );
   });
 });
 
