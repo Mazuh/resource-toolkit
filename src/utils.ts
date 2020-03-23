@@ -2,7 +2,8 @@ import { Entity, Operation, IdentifierKey } from './reducer-typings';
 
 export class ResourceToolkitError extends Error {}
 
-export function makeDefaultMessageText(relating: Entity | Entity[], operation: Operation, isError: boolean): string {
+export function makeDefaultMessageText(relating: Entity | Entity[], operation: Operation, error: null|Error|boolean): string {
+  const isError = error instanceof Error || error;
   const attachmentForMany = Array.isArray(relating) ? ` Related to ${relating.length} items.` : '';
 
   switch (operation) {

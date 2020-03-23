@@ -106,7 +106,7 @@ describe('reducer factory: commons', () => {
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });
 
-  it('supports adapter of error messages', () => {
+  it('supports adapter of error messages (thus adapter must be aware of error instance)', () => {
     const adapter = jest.fn(() => 'Any custom message here!');
 
     const customResource = makeReducerAssets({
@@ -136,8 +136,7 @@ describe('reducer factory: commons', () => {
 
     expect(customResource.reducer(previousState, action)).toEqual(expectedCurrentState);
 
-    const isError = true;
-    expect(adapter).toBeCalledWith(error, 'READ', isError);
+    expect(adapter).toBeCalledWith(error, 'READ', error);
   });
 
   it('handles clear message action', () => {

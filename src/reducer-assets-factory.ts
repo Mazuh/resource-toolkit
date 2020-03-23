@@ -35,7 +35,7 @@ export type ResourceToolParams = {
   relatedKeys: { [key: string]: RelatedType };
   gateway: Gateway;
   expectAllMeta?: boolean;
-  makeMessageText?: (relating: Entity | Entity[], operation: Operation, isError: boolean) => string;
+  makeMessageText?: typeof makeDefaultMessageText;
   logLibError?: typeof console.error;
 };
 export default function makeReducerAssets(params: ResourceToolParams): any {
@@ -557,9 +557,10 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
     } else if (operation === 'CLEAR_CURRENT_MESSAGE') {
       updating.currentMessage = null;
     } else if (isFinished) {
+      const causedByError = content instanceof Error ? content : null;
       const message: Message = {
-        text: makeMessageText(content, operation, isError),
-        causedByError: content instanceof Error ? content : null,
+        text: makeMessageText(content, operation, causedByError || isError),
+        causedByError,
         isError,
       };
       updating.finishingLogs = [...state.finishingLogs, message];
