@@ -5,6 +5,7 @@ const defaultState = {
   items: [],
   isCreating: false,
   isReadingBlindly: false,
+  isReadingAll: false,
   reading: [],
   updating: [],
   deleting: [],
@@ -129,6 +130,24 @@ describe('reducer factory: commons', () => {
       finishingLogs: ['One', 'Two', 'Three'],
       currentMessage: null,
     };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles truthy flag for reading', () => {
+    const action = userResource.actions.setIsReadingAll(true);
+
+    const previousState = { ...defaultState, isReadingAll: false };
+    const expectedCurrentState = { ...defaultState, isReadingAll: true };
+
+    expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
+  });
+
+  it('handles falsy flag for reading', () => {
+    const action = userResource.actions.setIsReadingAll(false);
+
+    const previousState = { ...defaultState, isReadingAll: true };
+    const expectedCurrentState = { ...defaultState, isReadingAll: false };
 
     expect(userResource.reducer(previousState, action)).toEqual(expectedCurrentState);
   });

@@ -161,6 +161,10 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       identifying: ownerIdentifier,
       relationshipKey,
     }),
+    setIsReadingAll: (isReadingAll: boolean) => makeAction({
+      operation: isReadingAll ? 'SET_READING_ALL' : 'SET_NOT_READING_ALL',
+      step: 'SUCCESS',
+    }),
     setMeta: (meta: DictKind) => makeAction({
       operation: 'SET_META',
       step: 'SUCCESS',
@@ -229,6 +233,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
     },
     readAll: (...args: any[]) => async (dispatch: BoundDispatch) => {
       dispatch(plainActions.setReading());
+      dispatch(plainActions.setIsReadingAll(true));
 
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
@@ -250,6 +255,8 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
         }
       } catch (error) {
         gracefullyDispatch(plainActions.setReadError(null, error));
+      } finally {
+        dispatch(plainActions.setIsReadingAll(false));
       }
     },
     update: (identifier: Identifier, ...args: any[]) => async (dispatch: BoundDispatch) => {
@@ -513,7 +520,11 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
     });
     updating.isLoading = isDoingSomethingOnItself || isDoingSomethingOnRelateds;
 
-    if (operation === 'SET_META') {
+    if (operation === 'SET_READING_ALL') {
+      updating.isReadingAll = true;
+    } else if (operation === 'SET_NOT_READING_ALL') {
+      updating.isReadingAll = false;
+    } else if (operation === 'SET_META') {
       updating.meta = content;
     } else if (operation === 'CLEAR_ITEMS') {
       updating.items = [];

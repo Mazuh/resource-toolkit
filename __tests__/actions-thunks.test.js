@@ -314,7 +314,9 @@ describe('action creator factory for thunks: read', () => {
 
     await thunk(dispatch);
 
-    expect(dispatch).toBeCalledTimes(3);
+    expect(dispatch).toBeCalledTimes(5);
+    expect(dispatch).toBeCalledWith(userResource.actions.setIsReadingAll(true));
+    expect(dispatch).toBeCalledWith(userResource.actions.setIsReadingAll(false));
     expect(dispatch).toBeCalledWith(userResource.actions.setReading(null));
     expect(dispatch).toBeCalledWith(userResource.actions.clearItems());
     expect(dispatch).toBeCalledWith(userResource.actions.setRead(null, expectedReadData));
@@ -334,7 +336,9 @@ describe('action creator factory for thunks: read', () => {
     const thunk = userResource.actions.readAll();
     await thunk(dispatch);
 
-    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledTimes(4);
+    expect(dispatch).toBeCalledWith(userResource.actions.setIsReadingAll(true));
+    expect(dispatch).toBeCalledWith(userResource.actions.setIsReadingAll(false));
     expect(dispatch).toBeCalledWith(userResource.actions.setReading(null));
     expect(dispatch).toBeCalledWith(userResource.actions.setReadError(null, error));
 
@@ -575,7 +579,9 @@ describe('action creator factory for thunks: reading all including meta', () => 
     const thunk = sampleResource.actions.readAll();
     await thunk(dispatch);
 
-    expect(dispatch).toBeCalledTimes(4);
+    expect(dispatch).toBeCalledTimes(6);
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setIsReadingAll(true));
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setIsReadingAll(false));
     expect(dispatch).toBeCalledWith(sampleResource.actions.setReading(null));
     expect(dispatch).toBeCalledWith(sampleResource.actions.clearItems());
     expect(dispatch).toBeCalledWith(
@@ -611,7 +617,9 @@ describe('action creator factory for thunks: reading all including meta', () => 
     const thunk = sampleResource.actions.readAll();
     await thunk(dispatch);
 
-    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledTimes(4);
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setIsReadingAll(true));
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setIsReadingAll(false));
     expect(dispatch).toBeCalledWith(sampleResource.actions.setReading(null));
     expect(dispatch).toBeCalledWith(
       sampleResource.actions.setReadError(
@@ -637,7 +645,9 @@ describe('action creator factory for thunks: reading all including meta', () => 
     const thunk = sampleResource.actions.readAll();
     await thunk(dispatch);
 
-    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledTimes(4);
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setIsReadingAll(true));
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setIsReadingAll(false));
     expect(dispatch).toBeCalledWith(sampleResource.actions.setReading(null));
     expect(dispatch).toBeCalledWith(
       sampleResource.actions.setReadError(
@@ -663,7 +673,9 @@ describe('action creator factory for thunks: reading all including meta', () => 
     const thunk = sampleResource.actions.readAll();
     await thunk(dispatch);
 
-    expect(dispatch).toBeCalledTimes(2);
+    expect(dispatch).toBeCalledTimes(4);
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setIsReadingAll(true));
+    expect(dispatch).toBeCalledWith(sampleResource.actions.setIsReadingAll(false));
     expect(dispatch).toBeCalledWith(sampleResource.actions.setReading(null));
     expect(dispatch).toBeCalledWith(
       sampleResource.actions.setReadError(

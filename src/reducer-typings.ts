@@ -3,6 +3,7 @@ export interface ResourceState {
   relatedsTo: IndexedRelationships;
   isCreating: boolean;
   isReadingBlindly: boolean;
+  isReadingAll: boolean,
   reading: Identifier[];
   updating: Identifier[];
   deleting: Identifier[];
@@ -41,6 +42,8 @@ export type Operation = (
   | 'RELATED_READ'
   | 'RELATED_UPDATED'
   | 'RELATED_DELETED'
+  | 'SET_READING_ALL'
+  | 'SET_NOT_READING_ALL'
   | 'SET_META'
   | 'CLEAR_ITEMS'
   | 'CLEAR_CURRENT_MESSAGE'
@@ -98,6 +101,7 @@ export const EMPTY_INITIAL_STATE: ResourceState = Object.freeze({
   relatedsTo: {},
   isCreating: false,
   isReadingBlindly: false,
+  isReadingAll: false,
   reading: [],
   updating: [],
   deleting: [],
