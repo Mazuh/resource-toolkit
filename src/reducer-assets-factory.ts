@@ -587,6 +587,8 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       ...plainActions,
       ...actionThunks,
     },
+    makeMessageText,
+    logLibError,
     makeAction,
     reducer,
   };
