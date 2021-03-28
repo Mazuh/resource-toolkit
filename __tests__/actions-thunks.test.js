@@ -706,3 +706,59 @@ describe('action creator factory for thunks: reading all including meta', () => 
     );
   });
 });
+
+describe('factory for thunks: may dispatch read after another operation', () => {
+  const realSetTimeout = global.setTimeout;
+
+  beforeAll(() => {
+    global.setTimeout = f => f();
+  });
+
+  afterAll(() => {
+    global.setTimeout = realSetTimeout;
+  });
+
+  let UserRestfulAPI;
+  let dispatch;
+
+  beforeEach(() => {
+    UserRestfulAPI = {
+      fetchCreate: makeMockedFetchFn({}),
+      fetchMany: makeMockedFetchFn({
+        data: [
+          { id: 1, name: 'Jeff' },
+          { id: 42, name: 'Mark' },
+        ],
+      }),
+    };
+
+    dispatch = jest.fn();
+  });
+
+  it('reads all after creating', async done => {
+    const userResource = makeReducerAssets({
+      name: 'USER',
+      idKey: 'id',
+      readAllToFinishOperations: true,
+      gateway: {
+        create: async creation => UserRestfulAPI.fetchCreate(creation),
+        fetchMany: async () => (await UserRestfulAPI.fetchMany().then(res => res.json())).data,
+      },
+    });
+
+    const thunk = userResource.actions.create({ name: 'Mark' });
+    await thunk(dispatch);
+
+    expect(dispatch).toBeCalledTimes(3);
+    expect(dispatch).toBeCalledWith(userResource.actions.setCreating());
+    expect(dispatch).toBeCalledWith(userResource.actions.clearItems());
+    expect(dispatch).toBeCalledWith(
+      userResource.actions.setRead(null, [
+        { id: 1, name: 'Jeff' },
+        { id: 42, name: 'Mark' },
+      ]),
+    );
+
+    done();
+  });
+});

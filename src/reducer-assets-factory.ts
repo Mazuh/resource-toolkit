@@ -3,7 +3,6 @@ import {
   IdentifierKey,
   Gateway,
   Entity,
-  Operation,
   ResourceAction,
   ResourceIntent,
   Identifier,
@@ -34,6 +33,7 @@ export type ResourceToolParams = {
   idKey: IdentifierKey;
   relatedKeys: { [key: string]: RelatedType };
   gateway: Gateway;
+  readAllToFinishOperations?: boolean,
   expectAllMeta?: boolean;
   makeMessageText?: typeof makeDefaultMessageText;
   logLibError?: typeof console.error;
@@ -48,6 +48,7 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
     idKey,
     gateway,
     relatedKeys = {},
+    readAllToFinishOperations = false,
     expectAllMeta = false,
     makeMessageText = makeDefaultMessageText,
     logLibError = console.error,
@@ -211,9 +212,31 @@ export default function makeReducerAssets(params: ResourceToolParams): any {
       const gracefullyDispatch = minimalDelayedHOC(dispatch);
       try {
         const content = await gateway.create(...args);
-        blockNonEntity(content);
+        if (!readAllToFinishOperations) {
+          blockNonEntity(content);
+          await gracefullyDispatch(plainActions.setCreated(content));
+          return;
+        }
 
-        await gracefullyDispatch(plainActions.setCreated(content));
+        const gracefullyDispatchSuccess = minimalDelayedHOC((payload: EntityWithMeta|Entity[]) => {
+          if (expectAllMeta) {
+            blockNonDataWithMeta(payload);
+
+            dispatch(plainActions.clearItems());
+            const { data, meta } = (payload as EntityWithMeta);
+            blockNonEntities(data);
+
+            dispatch(plainActions.setMeta(meta));
+            dispatch(plainActions.setRead(null, data));
+          } else {
+            blockNonEntities(payload);
+
+            dispatch(plainActions.clearItems());
+            dispatch(plainActions.setRead(null, payload));
+          }
+        });
+        const refetchedPayload = await gateway.fetchMany(null, ...args);
+        await gracefullyDispatchSuccess(refetchedPayload);
       } catch (error) {
         await gracefullyDispatch(plainActions.setCreateError(error));
         handleError(error);
