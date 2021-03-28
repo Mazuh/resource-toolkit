@@ -719,6 +719,7 @@ describe('factory for thunks: may dispatch read after another operation', () => 
   });
 
   let UserRestfulAPI;
+  let userResource;
   let dispatch;
 
   beforeEach(() => {
@@ -730,22 +731,26 @@ describe('factory for thunks: may dispatch read after another operation', () => 
           { id: 42, name: 'Mark' },
         ],
       }),
+      fetchUpdate: makeMockedFetchFn({}),
+      fetchDelete: makeMockedFetchFn({}),
     };
 
-    dispatch = jest.fn();
-  });
-
-  it('reads all after creating', async done => {
-    const userResource = makeReducerAssets({
+    userResource = makeReducerAssets({
       name: 'USER',
       idKey: 'id',
       readAllToFinishOperations: true,
       gateway: {
         create: async creation => UserRestfulAPI.fetchCreate(creation),
         fetchMany: async () => (await UserRestfulAPI.fetchMany().then(res => res.json())).data,
+        update: async (id, updating) => UserRestfulAPI.fetchUpdate(id, updating),
+        delete: async id => UserRestfulAPI.fetchUpdate(id),
       },
     });
 
+    dispatch = jest.fn();
+  });
+
+  it('reads all after create', async done => {
     const thunk = userResource.actions.create({ name: 'Mark' });
     await thunk(dispatch);
 
@@ -761,4 +766,21 @@ describe('factory for thunks: may dispatch read after another operation', () => 
 
     done();
   });
+
+  // it('reads all after update', async done => {
+  //   const thunk = userResource.actions.update(42, { id: 42, name: 'Mark' });
+  //   await thunk(dispatch);
+
+  //   // expect(dispatch).toBeCalledTimes(3);
+  //   expect(dispatch).toBeCalledWith(userResource.actions.setUpdating());
+  //   expect(dispatch).toBeCalledWith(userResource.actions.clearItems());
+  //   expect(dispatch).toBeCalledWith(
+  //     userResource.actions.setRead(null, [
+  //       { id: 1, name: 'Jeff' },
+  //       { id: 42, name: 'Mark' },
+  //     ]),
+  //   );
+
+  //   done();
+  // });
 });
